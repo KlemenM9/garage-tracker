@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0f1217">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-Title" content="Digital Garage Manager">
+    <meta name="apple-mobile-web-app-title" content="Digital Garage Manager">
     <title>Digital Garage Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -17,69 +17,103 @@
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Chakra Petch', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
-                    colors: { cupra: { bg: '#0f1217', surface: '#161b22', card: '#1c232d', border: '#2d3646', copper: '#b87333', copperLight: '#d48c46', red: '#b11226' } }
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Chakra Petch', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    },
+                    colors: {
+                        cupra: {
+                            bg: '#0f1217',
+                            surface: '#161b22',
+                            card: '#1c232d',
+                            border: '#2d3646',
+                            copper: '#c87d55',
+                            copperLight: '#e09f7d',
+                            red: '#b11226'
+                        }
+                    }
                 }
             }
         };
     </script>
     <style>
         body { background-color: #0f1217; color: #f3f4f6; font-family: 'Inter', sans-serif; }
-        .copper-grad { background: linear-gradient(135deg, #d48c46 0%, #b87333 100%); }
+        .copper-grad { background: linear-gradient(135deg, #e09f7d 0%, #c87d55 100%); }
         .card-hover { transition: transform 0.2s ease, border-color 0.2s ease; }
-        .card-hover:hover { transform: translateY(-2px); border-color: #d48c46; }
+        .card-hover:hover { transform: translateY(-2px); border-color: #e09f7d; }
         .step-checked { text-decoration: line-through; color: #6b7280; }
         select:disabled, button:disabled { opacity: 0.45; cursor: not-allowed; }
+        /* Fixed 3-Column Header Grid on Desktop so Center Nav Never Moves */
+        @media (min-width: 900px) {
+            .header-fixed-grid {
+                display: grid;
+                grid-template-columns: 1fr auto 1fr;
+                align-items: center;
+                gap: 1rem;
+            }
+        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col pb-20 lg:pb-10">
+<body class="min-h-screen flex flex-col pb-20 lg:pb-12">
 
-    <!-- STICKY HEADER -->
+    <!-- STICKY HEADER WITH ZERO-SHIFT 3-COLUMN GRID -->
     <header class="sticky top-0 z-40 bg-cupra-bg/95 backdrop-blur-md border-b border-cupra-border px-4 py-3">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2.5">
-                <button id="backToGarageBtn" onclick="showGarageLanding()" class="hidden px-3 py-1.5 rounded-xl bg-cupra-card hover:border-cupra-copper border border-cupra-border text-xs font-display font-bold uppercase text-cupra-copperLight flex items-center gap-1.5 transition">
-                    <i class="fa-solid fa-arrow-left"></i><span>My Garage</span>
-                </button>
-                <div onclick="showGarageLanding()" class="cursor-pointer flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl copper-grad flex items-center justify-center shadow">
-                        <i class="fa-solid fa-warehouse text-white text-sm"></i>
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 header-fixed-grid">
+
+            <!-- LEFT COLUMN (1fr, min-w-0, no shifting back button) -->
+            <div class="min-w-0 flex items-center gap-3 overflow-hidden">
+                <div onclick="showGarageLanding()" class="cursor-pointer flex items-center gap-2.5 min-w-0 group" title="Return to My Garage">
+                    <div class="w-9 h-9 rounded-xl copper-grad flex items-center justify-center shadow shrink-0 group-hover:opacity-90 transition">
+                        <i class="fa-solid fa-warehouse text-slate-950 text-sm"></i>
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <div class="flex items-center gap-2">
-                            <span class="text-[10px] font-display uppercase tracking-widest text-cupra-copperLight font-bold">Digital Garage Manager</span>
-                            <span id="hdrCountBadge" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cupra-card border border-cupra-border text-gray-300">0 Cars</span>
+                            <span class="text-[10px] font-display uppercase tracking-widest text-cupra-copperLight font-bold whitespace-nowrap">Digital Garage Manager</span>
+                            <span id="hdrCountBadge" class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cupra-card border border-cupra-border text-gray-300 whitespace-nowrap">0 Cars</span>
                         </div>
-                        <div class="text-xs sm:text-sm font-display font-bold text-white" id="hdrSubtitle">My Digital Garage</div>
+                        <div id="hdrSubtitle" class="text-xs sm:text-sm font-display font-bold text-white truncate max-w-[240px]">My Digital Garage</div>
                     </div>
                 </div>
             </div>
 
-            <div class="flex flex-wrap items-center gap-2.5 ml-auto">
-                <!-- LARGER PROMINENT HEADER ODOMETER BUBBLE (#6) -->
-                <div id="hdrOdoBox" class="hidden bg-cupra-surface border-2 border-cupra-copper/70 rounded-2xl px-3.5 py-1.5 flex items-center gap-2 shadow-lg">
-                    <i class="fa-solid fa-gauge-high text-cupra-copperLight text-base"></i>
-                    <div class="flex items-baseline gap-1">
-                        <input id="hdrOdoInput" type="number" step="50" onchange="updateOdo(this.value)" class="w-28 sm:w-32 bg-cupra-bg border border-cupra-border focus:border-cupra-copper rounded-xl px-2.5 py-1 text-base sm:text-lg font-mono font-bold text-white text-right focus:outline-none" title="Click to update current odometer">
-                        <span class="text-xs sm:text-sm font-mono font-bold text-cupra-copperLight">km</span>
-                    </div>
-                </div>
+            <!-- CENTER COLUMN (auto - Locked Pixel Position, Identical Font-Weight on All 5 Buttons) -->
+            <div class="hidden md:flex items-center justify-center shrink-0 bg-cupra-surface border border-cupra-border rounded-xl p-1">
+                <button id="topNav-garage" onclick="showGarageLanding()" class="px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition whitespace-nowrap">
+                    <i id="topNavIcon-garage" class="fa-solid fa-warehouse"></i><span>Garage</span>
+                </button>
+                <button id="topNav-schedule" onclick="openWorkspace('schedule')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition whitespace-nowrap">
+                    <i id="topNavIcon-schedule" class="fa-solid fa-calendar-check"></i><span>Schedule</span>
+                </button>
+                <button id="topNav-guides" onclick="openWorkspace('guides')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition whitespace-nowrap">
+                    <i id="topNavIcon-guides" class="fa-solid fa-book-wrench"></i><span>Guides</span>
+                </button>
+                <button id="topNav-ai" onclick="openWorkspace('ai')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition whitespace-nowrap">
+                    <i id="topNavIcon-ai" class="fa-solid fa-wand-magic-sparkles"></i><span>AI Mechanic</span>
+                </button>
+                <button id="topNav-settings" onclick="openSettingsModal()" class="px-3.5 py-1.5 rounded-lg text-xs font-bold text-gray-300 hover:text-white flex items-center gap-1.5 transition whitespace-nowrap">
+                    <i class="fa-solid fa-sliders text-cupra-copperLight"></i><span>Settings</span>
+                </button>
+            </div>
 
-                <div id="syncBadge" onclick="openSettingsModal()" class="cursor-pointer px-3 py-1.5 rounded-xl border border-emerald-500/35 bg-emerald-500/10 text-emerald-300 text-xs flex items-center gap-2" title="Cloud Sync & API Settings">
+            <!-- RIGHT COLUMN (1fr, right-aligned status & install buttons) -->
+            <div class="flex items-center justify-end gap-2 ml-auto md:ml-0 shrink-0">
+                <div id="syncBadge" onclick="openSettingsModal()" class="cursor-pointer px-3 py-1.5 rounded-xl border border-emerald-500/35 bg-emerald-500/10 text-emerald-300 text-xs flex items-center gap-2 whitespace-nowrap" title="Cloud Sync & API Settings">
                     <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
                     <span id="syncText" class="font-semibold text-[11px]">Cloud Sync</span>
                 </div>
 
-                <button onclick="openInstallModal()" class="px-3 py-1.5 rounded-xl bg-cupra-surface hover:border-cupra-copper border border-cupra-border text-xs font-semibold text-cupra-copperLight flex items-center gap-1.5">
+                <button onclick="openInstallModal()" class="px-3 py-1.5 rounded-xl bg-cupra-surface hover:border-cupra-copper border border-cupra-border text-xs font-semibold text-cupra-copperLight flex items-center gap-1.5 whitespace-nowrap">
                     <i class="fa-solid fa-mobile-screen-button"></i>
                     <span class="hidden sm:inline">Install App</span>
                 </button>
 
-                <button onclick="openSettingsModal()" class="px-3 py-1.5 rounded-xl bg-cupra-surface hover:border-cupra-copper border border-cupra-border text-xs font-semibold text-gray-300 flex items-center gap-1.5">
+                <button onclick="openSettingsModal()" class="px-3 py-1.5 rounded-xl bg-cupra-surface hover:border-cupra-copper border border-cupra-border text-xs font-semibold text-gray-300 flex items-center gap-1.5 whitespace-nowrap">
                     <i class="fa-solid fa-sliders text-cupra-copperLight"></i>
                     <span class="hidden sm:inline">Settings</span>
                 </button>
             </div>
+
         </div>
     </header>
 
@@ -89,12 +123,12 @@
     <main id="garageView" class="max-w-7xl w-full mx-auto px-4 pt-6 space-y-6">
         <div class="bg-cupra-surface border border-cupra-border rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-display uppercase tracking-widest copper-grad text-white font-bold">Offline-First &amp; Cloud Synced</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-display uppercase tracking-widest copper-grad text-slate-950 font-bold">Offline-First &amp; Cloud Synced</span>
                 <h1 class="font-display font-bold text-2xl sm:text-3xl text-white mt-1">Digital Garage Manager</h1>
                 <p class="text-xs sm:text-sm text-gray-400 mt-0.5">Select a vehicle below or add a new vehicle to track intervals and generate workshop procedures on demand.</p>
             </div>
             <div class="flex flex-wrap gap-2 shrink-0">
-                <button onclick="openVehicleModal()" class="px-4 py-2.5 rounded-xl copper-grad text-white text-xs sm:text-sm font-display font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg">
+                <button onclick="openVehicleModal()" class="px-4 py-2.5 rounded-xl copper-grad text-slate-950 text-xs sm:text-sm font-display font-bold uppercase tracking-wider flex items-center gap-2 shadow-lg">
                     <i class="fa-solid fa-plus"></i><span>Add Vehicle to Garage</span>
                 </button>
             </div>
@@ -108,30 +142,30 @@
         <div class="bg-cupra-surface border border-cupra-border rounded-2xl p-4 sm:p-5 space-y-4">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                    <div class="relative w-full sm:w-48 h-32 rounded-xl overflow-hidden bg-cupra-bg border border-cupra-border shrink-0">
+                    <div class="relative w-full sm:w-48 h-28 rounded-xl overflow-hidden bg-cupra-bg border border-cupra-border shrink-0">
                         <img id="wsCarPhoto" src="" alt="Car" class="w-full h-full object-cover">
-                        <button onclick="triggerQuickPhoto(state.activeId, event)" class="absolute bottom-2 right-2 px-2.5 py-1 rounded-lg bg-black/80 hover:bg-cupra-copper text-[10px] text-white font-semibold">
-                            <i class="fa-solid fa-camera mr-1"></i>Photo
+                        <button onclick="triggerQuickPhoto(state.activeId, event)" class="absolute bottom-2 right-2 px-2.5 py-1 rounded-lg bg-black/80 hover:bg-cupra-copper hover:text-slate-950 text-[10px] text-white font-semibold transition">
+                            <i class="fa-solid fa-camera mr-1"></i>Change Photo
                         </button>
                     </div>
-                    <div class="space-y-2">
+                    <!-- CLEAN VEHICLE HEADER: ONLY NAME + ENGINE/TRANSMISSION SUBTITLE -->
+                    <div class="space-y-1.5">
                         <div class="flex flex-wrap items-center gap-2">
                             <h2 id="wsCarTitle" class="font-display font-bold text-xl sm:text-2xl text-white"></h2>
                             <button onclick="openVehicleModal(state.activeId)" class="text-xs px-2.5 py-1 rounded-lg bg-cupra-card hover:border-cupra-copper border border-cupra-border text-gray-200">
-                                <i class="fa-solid fa-pen mr-1 text-cupra-copperLight"></i>Edit
+                                <i class="fa-solid fa-pen mr-1 text-cupra-copperLight"></i>Edit Profile
                             </button>
                             <button onclick="confirmRemoveVehicle(state.activeId, event)" class="text-xs px-2.5 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/25 border border-red-500/35 text-red-300">
                                 <i class="fa-solid fa-trash-can mr-1"></i>Remove Car
                             </button>
                         </div>
-                        <div id="wsCarSub" class="text-xs sm:text-sm font-mono text-gray-200"></div>
-                        <div id="wsCarMeta" class="text-xs font-mono text-gray-400"></div>
+                        <div id="wsCarSub" class="text-xs sm:text-sm font-mono text-gray-300"></div>
                     </div>
                 </div>
 
-                <!-- LARGER ODOMETER BUBBLE IN WORKSPACE (#6) -->
+                <!-- PROMINENT ODOMETER BUBBLE IN WORKSPACE -->
                 <div class="bg-cupra-bg border-2 border-cupra-copper/60 rounded-2xl px-4 py-3 flex items-center justify-between sm:justify-start gap-3 shrink-0 shadow-md">
-                    <div class="w-10 h-10 rounded-xl copper-grad flex items-center justify-center text-white text-base shrink-0">
+                    <div class="w-10 h-10 rounded-xl copper-grad flex items-center justify-center text-slate-950 text-base shrink-0">
                         <i class="fa-solid fa-gauge-high"></i>
                     </div>
                     <div>
@@ -144,53 +178,54 @@
                 </div>
             </div>
 
-            <!-- IN-PROFILE OIL SERVICE REGIME TOGGLE (FACTORY SPEC vs CUSTOM - #5) -->
-            <div class="pt-3 border-t border-cupra-border flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-                <div class="flex flex-wrap items-center gap-2.5 bg-cupra-bg/90 border border-cupra-border rounded-xl p-2.5 text-xs">
-                    <div class="flex items-center gap-1.5 pr-2 border-r border-cupra-border">
-                        <i class="fa-solid fa-oil-can text-cupra-copperLight"></i>
-                        <span class="font-display font-bold uppercase tracking-wider text-gray-200">Oil Service Regime:</span>
-                    </div>
-                    <div class="flex items-center gap-1 bg-cupra-surface p-1 rounded-lg border border-cupra-border">
-                        <button id="oilModeFactoryBtn" type="button" onclick="setOilRegimeMode('factory')" class="px-3 py-1 rounded-md text-xs font-semibold transition">Factory Spec</button>
-                        <button id="oilModeCustomBtn" type="button" onclick="setOilRegimeMode('custom')" class="px-3 py-1 rounded-md text-xs font-semibold transition">Custom</button>
-                    </div>
-                    <span id="oilFactoryLabel" class="font-mono text-cupra-copperLight font-semibold px-1">15,000 km / 12 mos</span>
-                    <div id="oilCustomInputs" class="hidden flex flex-wrap items-center gap-1.5">
-                        <input id="oilCustomKm" type="number" step="1000" min="1000" class="w-24 bg-cupra-surface border border-cupra-copper rounded-lg px-2 py-1 font-mono font-bold text-white text-right" placeholder="15000">
-                        <span class="font-mono text-gray-400">km /</span>
-                        <input id="oilCustomMonths" type="number" step="1" min="1" class="w-16 bg-cupra-surface border border-cupra-copper rounded-lg px-2 py-1 font-mono font-bold text-white text-right" placeholder="12">
-                        <span class="font-mono text-gray-400">mos</span>
-                        <button type="button" onclick="applyCustomOilRegime()" class="px-2.5 py-1 rounded-lg copper-grad text-white font-semibold">Apply</button>
-                    </div>
-                </div>
-
-                <!-- Navigation Tabs -->
+            <!-- CLEAN SUB-TAB BAR (NO REDUNDANT OIL REGIME HINT TEXT) -->
+            <div class="pt-3 border-t border-cupra-border flex flex-wrap items-center justify-between gap-3">
                 <div class="flex flex-wrap gap-1.5 bg-cupra-bg p-1.5 rounded-xl border border-cupra-border">
-                    <button id="tabBtn-schedule" onclick="switchWsTab('schedule')" class="ws-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold copper-grad text-white"><i class="fa-solid fa-calendar-check mr-1.5"></i>Profile &amp; Schedule</button>
-                    <button id="tabBtn-guides" onclick="switchWsTab('guides')" class="ws-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold text-gray-300 hover:bg-cupra-card"><i class="fa-solid fa-book-wrench mr-1.5 text-cupra-copperLight"></i>Workshop Guides</button>
-                    <button id="tabBtn-logbook" onclick="switchWsTab('logbook')" class="ws-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold text-gray-300 hover:bg-cupra-card"><i class="fa-solid fa-clipboard-list mr-1.5 text-cupra-copperLight"></i>Service Logbook</button>
-                    <button id="tabBtn-ai" onclick="switchWsTab('ai')" class="ws-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold text-gray-300 hover:bg-cupra-card"><i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-cupra-copperLight"></i>AI Mechanic</button>
+                    <button id="tabBtn-schedule" onclick="switchWsTab('schedule')" class="ws-tab-btn px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition">
+                        <i id="tabIcon-schedule" class="fa-solid fa-calendar-check"></i><span>Schedule &amp; Logbook</span>
+                    </button>
+                    <button id="tabBtn-guides" onclick="switchWsTab('guides')" class="ws-tab-btn px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition">
+                        <i id="tabIcon-guides" class="fa-solid fa-book-wrench"></i><span>Workshop Guides</span>
+                    </button>
+                    <button id="tabBtn-ai" onclick="switchWsTab('ai')" class="ws-tab-btn px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition">
+                        <i id="tabIcon-ai" class="fa-solid fa-wand-magic-sparkles"></i><span>AI Mechanic</span>
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 1: PROFILE & MAINTENANCE SCHEDULE -->
-        <section id="wsTab-schedule" class="space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-                <div class="flex flex-wrap gap-1.5 bg-cupra-surface border border-cupra-border rounded-xl p-1">
-                    <button onclick="setFilter('all')" id="flt-all" class="px-3 py-1.5 rounded-lg text-xs font-semibold copper-grad text-white">All Intervals</button>
-                    <button onclick="setFilter('overdue')" id="flt-overdue" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300">Overdue</button>
-                    <button onclick="setFilter('due-soon')" id="flt-due-soon" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300">Due Soon</button>
-                    <button onclick="setFilter('upcoming')" id="flt-upcoming" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300">Upcoming / OK</button>
+        <!-- TAB 1: SCHEDULE & COMPLETED SERVICE LOGBOOK -->
+        <section id="wsTab-schedule" class="space-y-6">
+            <div class="space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex flex-wrap gap-1.5 bg-cupra-surface border border-cupra-border rounded-xl p-1">
+                        <button onclick="setFilter('all')" id="flt-all" class="px-3 py-1.5 rounded-lg text-xs font-bold copper-grad text-slate-950">All Intervals</button>
+                        <button onclick="setFilter('overdue')" id="flt-overdue" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-300">Overdue</button>
+                        <button onclick="setFilter('due-soon')" id="flt-due-soon" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-300">Due Soon</button>
+                        <button onclick="setFilter('upcoming')" id="flt-upcoming" class="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-300">Upcoming / OK</button>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="openTaskModal()" class="px-3.5 py-1.5 rounded-xl copper-grad text-slate-950 text-xs font-bold">+ Add Custom Interval</button>
+                        <button onclick="loadStandardTemplate(true)" class="px-3 py-1.5 rounded-xl bg-cupra-card hover:border-cupra-copper border border-cupra-border text-xs font-semibold text-gray-200"><i class="fa-solid fa-rotate text-cupra-copperLight mr-1"></i>Reset Standard 9 Services</button>
+                        <button onclick="aiAutoBuildSchedule()" class="px-3 py-1.5 rounded-xl bg-cupra-card hover:border-cupra-copper border border-cupra-border text-xs font-semibold text-cupra-copperLight"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Verify Factory Specs with Gemini</button>
+                    </div>
                 </div>
-                <div class="flex flex-wrap gap-2">
-                    <button onclick="openTaskModal()" class="px-3.5 py-1.5 rounded-xl copper-grad text-white text-xs font-semibold">+ Add Maintenance Task</button>
-                    <button onclick="loadStandardTemplate()" class="px-3 py-1.5 rounded-xl bg-cupra-card hover:border-cupra-copper border border-cupra-border text-xs font-semibold text-gray-200"><i class="fa-solid fa-list-check text-cupra-copperLight mr-1"></i>Load Standard Template</button>
-                    <button onclick="aiAutoBuildSchedule()" class="px-3 py-1.5 rounded-xl bg-cupra-card hover:border-cupra-copper border border-cupra-border text-xs font-semibold text-cupra-copperLight"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Generate Factory Schedule with Gemini</button>
-                </div>
+
+                <!-- 1 SERVICE OPTION PER HORIZONTAL ROW -->
+                <div id="tasksGrid" class="flex flex-col space-y-3"></div>
             </div>
-            <div id="tasksGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+            <!-- COMPLETED SERVICE & REPAIR LOGBOOK -->
+            <div class="bg-cupra-surface border border-cupra-border rounded-2xl p-4 sm:p-5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <h3 class="font-display font-bold text-lg text-white">Completed Service &amp; Repair Logbook</h3>
+                        <p class="text-xs text-gray-400">Chronological history of maintenance, part costs, and repairs logged for this vehicle.</p>
+                    </div>
+                    <button onclick="openLogModal('', 'unscheduled')" class="px-3.5 py-2 rounded-xl copper-grad text-slate-950 text-xs font-bold">+ Add Log Entry</button>
+                </div>
+                <div id="historyList" class="space-y-2.5"></div>
+            </div>
         </section>
 
         <!-- TAB 2: OFFLINE WORKSHOP GUIDES -->
@@ -199,32 +234,18 @@
                 <div>
                     <span class="text-[10px] font-display uppercase tracking-widest text-emerald-400 font-bold">Offline Procedure Library</span>
                     <h3 class="font-display font-bold text-lg text-white">Saved Workshop Guides &amp; Torque Specs</h3>
-                    <p class="text-xs text-gray-400">No instructions are pre-made in advance. Add your own procedures or generate them for this vehicle with Gemini AI.</p>
+                    <p class="text-xs text-gray-400">Create and edit your own procedures or generate them for this vehicle with Gemini AI.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
                     <input id="guideSearch" type="text" oninput="renderGuides()" placeholder="Search saved guides..." class="bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-xs text-white">
-                    <button onclick="openGuideModal()" class="px-3.5 py-2 rounded-xl copper-grad text-white text-xs font-semibold">+ Create Guide</button>
+                    <button onclick="openGuideModal()" class="px-3.5 py-2 rounded-xl copper-grad text-slate-950 text-xs font-bold">+ Create Guide</button>
                     <button onclick="switchWsTab('ai')" class="px-3.5 py-2 rounded-xl bg-cupra-card hover:border-cupra-copper border border-cupra-border text-xs font-semibold text-cupra-copperLight"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Generate with AI</button>
                 </div>
             </div>
             <div id="guidesList" class="space-y-4"></div>
         </section>
 
-        <!-- TAB 3: SERVICE LOGBOOK -->
-        <section id="wsTab-logbook" class="hidden space-y-4">
-            <div class="bg-cupra-surface border border-cupra-border rounded-2xl p-4 sm:p-5 space-y-3">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="font-display font-bold text-lg text-white">Completed Service &amp; Repair Logbook</h3>
-                        <p class="text-xs text-gray-400">Chronological history of maintenance and repairs logged for this vehicle.</p>
-                    </div>
-                    <button onclick="openLogModal('', 'unscheduled')" class="px-3.5 py-2 rounded-xl copper-grad text-white text-xs font-semibold">+ Add Log Entry</button>
-                </div>
-                <div id="historyList" class="space-y-2.5"></div>
-            </div>
-        </section>
-
-        <!-- TAB 4: AI MECHANIC & DEEP RESEARCH -->
+        <!-- TAB 3: AI MECHANIC & DEEP RESEARCH -->
         <section id="wsTab-ai" class="hidden space-y-4">
             <div class="bg-cupra-surface border border-cupra-border rounded-2xl p-5 space-y-4">
                 <div class="flex flex-wrap items-center justify-between gap-2">
@@ -257,7 +278,7 @@
                 <textarea id="aiInput" rows="3" placeholder="Ask how to perform a maintenance job, request torque specs, or troubleshoot an issue on this car..." class="w-full bg-cupra-bg border border-cupra-border rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-cupra-copper"></textarea>
 
                 <div class="flex flex-wrap gap-2">
-                    <button onclick="runGeminiQuery()" class="px-5 py-2.5 rounded-xl copper-grad text-white text-xs sm:text-sm font-display font-bold uppercase tracking-wider shadow">
+                    <button onclick="runGeminiQuery()" class="px-5 py-2.5 rounded-xl copper-grad text-slate-950 text-xs sm:text-sm font-display font-bold uppercase tracking-wider shadow">
                         <i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i><span id="aiRunText">Ask Gemini Mechanic</span>
                     </button>
                     <button onclick="saveLastAiToGuides()" id="saveAiGuideBtn" class="hidden px-4 py-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-semibold">
@@ -270,16 +291,18 @@
         </section>
     </div>
 
-    <!-- MOBILE BOTTOM BAR -->
-    <nav class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-cupra-bg/95 backdrop-blur-md border-t border-cupra-border px-2 py-1.5 grid grid-cols-5 gap-1 text-[11px]">
-        <button onclick="showGarageLanding()" class="py-2 flex flex-col items-center text-cupra-copperLight font-semibold"><i class="fa-solid fa-warehouse mb-0.5"></i><span>Garage</span></button>
-        <button onclick="openWorkspace('schedule')" class="py-2 flex flex-col items-center text-gray-300"><i class="fa-solid fa-calendar-check mb-0.5"></i><span>Schedule</span></button>
-        <button onclick="openWorkspace('guides')" class="py-2 flex flex-col items-center text-gray-300"><i class="fa-solid fa-book-wrench mb-0.5"></i><span>Guides</span></button>
-        <button onclick="openWorkspace('ai')" class="py-2 flex flex-col items-center text-gray-300"><i class="fa-solid fa-wand-magic-sparkles mb-0.5"></i><span>AI</span></button>
-        <button onclick="openSettingsModal()" class="py-2 flex flex-col items-center text-gray-300"><i class="fa-solid fa-sliders mb-0.5"></i><span>Settings</span></button>
+    <!-- PERSISTENT BOTTOM NAVIGATION DOCK -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-cupra-bg/95 backdrop-blur-md border-t border-cupra-border px-2 py-1.5">
+        <div class="max-w-3xl mx-auto grid grid-cols-5 gap-1 text-[11px]">
+            <button id="botNav-garage" onclick="showGarageLanding()" class="py-1.5 rounded-xl flex flex-col items-center font-bold transition"><i class="fa-solid fa-warehouse mb-0.5 text-sm"></i><span>Garage</span></button>
+            <button id="botNav-schedule" onclick="openWorkspace('schedule')" class="py-1.5 rounded-xl flex flex-col items-center font-bold transition"><i class="fa-solid fa-calendar-check mb-0.5 text-sm"></i><span>Schedule</span></button>
+            <button id="botNav-guides" onclick="openWorkspace('guides')" class="py-1.5 rounded-xl flex flex-col items-center font-bold transition"><i class="fa-solid fa-book-wrench mb-0.5 text-sm"></i><span>Guides</span></button>
+            <button id="botNav-ai" onclick="openWorkspace('ai')" class="py-1.5 rounded-xl flex flex-col items-center font-bold transition"><i class="fa-solid fa-wand-magic-sparkles mb-0.5 text-sm"></i><span>AI</span></button>
+            <button id="botNav-settings" onclick="openSettingsModal()" class="py-1.5 rounded-xl flex flex-col items-center text-gray-300 hover:text-white font-bold transition"><i class="fa-solid fa-sliders mb-0.5 text-sm"></i><span>Settings</span></button>
+        </div>
     </nav>
 
-    <!-- MODAL 1: ADD / EDIT VEHICLE (EMPTY BY DEFAULT, STREAMLINED FIELDS #4, #7, #8, #10, #11) -->
+    <!-- MODAL 1: ADD / EDIT VEHICLE -->
     <div id="vehicleModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-cupra-surface border border-cupra-border rounded-2xl max-w-2xl w-full p-5 space-y-3.5 text-xs my-8">
             <div class="flex items-center justify-between border-b border-cupra-border pb-2.5">
@@ -289,18 +312,18 @@
             <form id="vehicleForm" onsubmit="saveVehicleForm(event)" class="space-y-3.5">
                 <input id="editVehId" type="hidden">
 
-                <!-- Photo Picker with Professional Studio Silhouette Preview (#9) -->
+                <!-- Photo Picker with Sport Coupe Silhouette Preview -->
                 <div class="flex items-center gap-3.5 bg-cupra-card p-3 rounded-xl border border-cupra-border">
                     <img id="modalPhotoPreview" src="" alt="Preview" class="w-32 h-20 rounded-lg object-cover bg-cupra-bg border border-cupra-border shrink-0">
                     <div class="space-y-1.5 flex-1">
                         <div class="font-semibold text-white">Vehicle Photo (Optional)</div>
-                        <div class="text-[11px] text-gray-400">Uses a professional studio silhouette by default, or upload a photo of your car.</div>
+                        <div class="text-[11px] text-gray-400">Uses a sleek sport silhouette by default, or upload a photo of your car.</div>
                         <div class="flex flex-wrap gap-2 pt-0.5">
-                            <label class="cursor-pointer px-3 py-1.5 rounded-lg copper-grad text-white font-semibold">
+                            <label class="cursor-pointer px-3 py-1.5 rounded-lg copper-grad text-slate-950 font-bold">
                                 <i class="fa-solid fa-camera mr-1"></i>Upload / Camera
                                 <input id="modalFileInput" type="file" accept="image/*" onchange="onModalPhotoUpload(event)" class="hidden">
                             </label>
-                            <button type="button" onclick="clearModalCustomPhoto()" class="px-2.5 py-1.5 rounded-lg bg-cupra-bg border border-cupra-border text-gray-300">Reset to Studio Silhouette</button>
+                            <button type="button" onclick="clearModalCustomPhoto()" class="px-2.5 py-1.5 rounded-lg bg-cupra-bg border border-cupra-border text-gray-300">Reset to Silhouette</button>
                         </div>
                     </div>
                 </div>
@@ -324,14 +347,14 @@
                     </div>
                 </div>
 
-                <!-- Row 2: Engine (Includes Engine Codes directly inside dropdown - #7) -->
+                <!-- Row 2: Engine -->
                 <div>
                     <label class="block text-gray-400 mb-1">Engine *</label>
                     <select id="selEngine" required disabled onchange="onEngineSelected()" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-2.5 py-2 text-white"></select>
                     <input id="inpEngineCustom" type="text" placeholder="Type Engine & Code manually (e.g. 1.5 TSI 150 PS DPCA)..." class="hidden mt-1.5 w-full bg-cupra-bg border border-cupra-copper rounded-lg px-2.5 py-1.5 text-white">
                 </div>
 
-                <!-- Row 3: Transmission / Gearbox Optional Type + Optional Definition (#8, #11) -->
+                <!-- Row 3: Transmission / Gearbox Optional Type + Optional Definition -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
                         <label class="block text-gray-400 mb-1">Transmission / Gearbox (Optional)</label>
@@ -347,7 +370,7 @@
                     </div>
                 </div>
 
-                <!-- Row 4: Odometer, Optional Nickname & Optional VIN (#4 - Paint Color & Delivery Date Removed) -->
+                <!-- Row 4: Odometer, Optional Nickname & Optional VIN -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     <div>
                         <label class="block text-gray-400 mb-1">Current Odometer (km) *</label>
@@ -365,7 +388,7 @@
 
                 <div class="flex items-center justify-end gap-2 pt-3 border-t border-cupra-border">
                     <button type="button" onclick="closeModal('vehicleModal')" class="px-4 py-2 rounded-xl bg-cupra-card text-gray-300">Cancel</button>
-                    <button id="vehSubmitBtn" type="submit" class="px-5 py-2 rounded-xl copper-grad text-white font-semibold">Add Vehicle to Garage</button>
+                    <button id="vehSubmitBtn" type="submit" class="px-5 py-2 rounded-xl copper-grad text-slate-950 font-bold">Add Vehicle to Garage</button>
                 </div>
             </form>
         </div>
@@ -386,7 +409,7 @@
         </div>
     </div>
 
-    <!-- MODAL 3: INSTALL ON PHONE (S25 ULTRA) & PC -->
+    <!-- MODAL 3: INSTALL ON PHONE & PC -->
     <div id="installModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-cupra-surface border border-cupra-border rounded-2xl max-w-lg w-full p-5 space-y-4 text-xs">
             <div class="flex items-center justify-between border-b border-cupra-border pb-2.5">
@@ -398,7 +421,7 @@
                     <div class="font-bold text-white">Direct Browser Install Ready</div>
                     <div class="text-gray-400">Click to install directly to your device right now.</div>
                 </div>
-                <button onclick="triggerNativeInstall()" class="px-4 py-2 rounded-xl copper-grad text-white font-semibold">Install Now</button>
+                <button onclick="triggerNativeInstall()" class="px-4 py-2 rounded-xl copper-grad text-slate-950 font-bold">Install Now</button>
             </div>
             <div class="space-y-3 text-gray-300">
                 <div class="bg-cupra-card border border-cupra-border rounded-xl p-3.5 space-y-1.5">
@@ -407,61 +430,79 @@
                         <li>Open <span class="font-mono text-white">https://klemenm9.github.io/garage-tracker/</span> in <strong>Chrome</strong>.</li>
                         <li>Tap the <strong>three dots menu (⋮)</strong> in the top-right corner of Chrome.</li>
                         <li>Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong>.</li>
-                        <li>Confirm <strong>Install</strong> — the Digital Garage Manager icon will appear on your phone's home screen and work offline!</li>
+                        <li>Confirm <strong>Install</strong> — the icon will appear on your home screen and work offline!</li>
                     </ol>
                 </div>
                 <div class="bg-cupra-card border border-cupra-border rounded-xl p-3.5 space-y-1.5">
                     <div class="font-display font-bold text-sm text-emerald-400"><i class="fa-solid fa-desktop mr-1.5"></i>On Your Windows / Mac PC</div>
                     <ol class="list-decimal list-inside space-y-1 text-gray-300">
                         <li>Open <span class="font-mono text-white">https://klemenm9.github.io/garage-tracker/</span> in <strong>Chrome</strong> or <strong>Edge</strong>.</li>
-                        <li>Look at the <strong>right side of the address bar</strong> (URL bar) at the top of the browser.</li>
-                        <li>Click the <strong>Install icon</strong> (a small monitor with a down arrow <i class="fa-solid fa-download"></i>) and click <strong>Install</strong>.</li>
-                        <li>It will open in its own standalone window and place a shortcut on your Desktop / Start Menu.</li>
+                        <li>Look at the <strong>right side of the address bar</strong> at the top of the browser.</li>
+                        <li>Click the <strong>Install icon</strong> (<i class="fa-solid fa-download"></i>) and click <strong>Install</strong>.</li>
                     </ol>
                 </div>
             </div>
             <div class="flex justify-end">
-                <button onclick="closeModal('installModal')" class="px-4 py-2 rounded-xl copper-grad text-white font-semibold">Got It</button>
+                <button onclick="closeModal('installModal')" class="px-4 py-2 rounded-xl copper-grad text-slate-950 font-bold">Got It</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 4: SETTINGS (GEMINI KEY, FIREBASE SYNC & BACKUP) -->
+    <!-- MODAL 4: SETTINGS (GEMINI KEY, FIREBASE SYNC & ZERO-LOSS BACKUPS) -->
     <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-cupra-surface border border-cupra-border rounded-2xl max-w-lg w-full p-5 space-y-4 text-xs">
+        <div class="bg-cupra-surface border border-cupra-border rounded-2xl max-w-lg w-full p-5 space-y-4 text-xs my-8">
             <div class="flex items-center justify-between border-b border-cupra-border pb-2.5">
                 <h3 class="font-display font-bold text-lg text-white"><i class="fa-solid fa-sliders text-cupra-copperLight mr-2"></i>Settings, Cloud Sync &amp; API Key</h3>
                 <button onclick="closeModal('settingsModal')" class="text-gray-400 hover:text-white text-base"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-3">
                 <div class="bg-cupra-card border border-cupra-border rounded-xl p-3.5 space-y-2">
-                    <div class="font-bold text-white"><i class="fa-solid fa-key text-cupra-copperLight mr-1.5"></i>Personal Gemini API Key</div>
-                    <p class="text-gray-400">Saved locally on this device (`localStorage`) so it is never exposed in public GitHub code.</p>
-                    <div class="flex gap-2">
-                        <input id="apiKeyInput" type="password" placeholder="Paste Gemini API Key..." class="flex-1 bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 font-mono text-white">
-                        <button onclick="saveApiKey()" class="px-4 py-2 rounded-xl copper-grad text-white font-semibold">Save Key</button>
+                    <div class="flex items-center justify-between">
+                        <div class="font-bold text-white"><i class="fa-solid fa-key text-cupra-copperLight mr-1.5"></i>Personal Gemini API Key (Optional)</div>
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" class="text-[11px] text-cupra-copperLight underline hover:text-white">Get Free AIza... Key ↗</a>
                     </div>
+                    <p class="text-gray-400 leading-relaxed">Saved locally in your browser (`localStorage`) so it is never exposed in public GitHub code.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <input id="apiKeyInput" type="password" placeholder="Paste Gemini API Key (starts with AIzaSy...)" class="flex-1 min-w-[200px] bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 font-mono text-white">
+                        <button type="button" onclick="saveApiKey()" class="px-3.5 py-2 rounded-xl copper-grad text-slate-950 font-bold">Save Key</button>
+                        <button type="button" onclick="testGeminiApiKey()" class="px-3 py-2 rounded-xl bg-cupra-bg hover:border-cupra-copper border border-cupra-border text-gray-200 font-semibold">Test Key</button>
+                    </div>
+                    <div id="apiKeyTestStatus" class="hidden text-[11px] font-mono p-2 rounded-lg bg-cupra-bg border border-cupra-border"></div>
                 </div>
+
                 <div class="bg-cupra-card border border-cupra-border rounded-xl p-3.5 space-y-2">
-                    <div class="font-bold text-white"><i class="fa-solid fa-cloud text-emerald-400 mr-1.5"></i>Firebase Real-Time Sync (`my-garage-sync`)</div>
-                    <div class="flex gap-2">
-                        <input id="syncRoomInput" type="text" value="klemen_digital_garage_v3" class="flex-1 bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 font-mono text-white">
-                        <button onclick="pushCloud(true)" class="px-3.5 py-2 rounded-xl copper-grad text-white font-semibold">Force Push to Cloud</button>
+                    <div class="font-bold text-white"><i class="fa-solid fa-cloud text-emerald-400 mr-1.5"></i>Firebase Real-Time Cloud Vault (`my-garage-sync`)</div>
+                    <p class="text-gray-400 leading-relaxed">Your garage data is preserved across app updates both locally (`dgm_garage_v3_clean`) and in Firebase Cloud.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <input id="syncRoomInput" type="text" value="klemen_digital_garage_v3" onchange="saveSyncRoom()" class="flex-1 min-w-[180px] bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 font-mono text-white">
+                        <button type="button" onclick="pushCloud(true)" class="px-3 py-2 rounded-xl copper-grad text-slate-950 font-bold">Force Push to Cloud</button>
+                        <button type="button" onclick="pullFromCloud(true)" class="px-3 py-2 rounded-xl bg-cupra-bg hover:border-cupra-copper border border-cupra-border text-emerald-300 font-semibold">Restore from Cloud</button>
                     </div>
                 </div>
-                <div class="bg-cupra-card border border-cupra-border rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-2">
-                    <button onclick="exportJson()" class="px-3 py-2 rounded-xl bg-cupra-bg border border-cupra-border text-gray-200"><i class="fa-solid fa-download mr-1"></i>Export Backup (.JSON)</button>
-                    <label class="cursor-pointer px-3 py-2 rounded-xl bg-cupra-bg border border-cupra-border text-gray-200">
-                        <i class="fa-solid fa-upload mr-1"></i>Import Backup
-                        <input type="file" accept=".json" onchange="importJson(event)" class="hidden">
-                    </label>
-                    <button onclick="openWipeConfirmModal()" class="px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/40 text-red-300 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Wipe All Garage Data</button>
+
+                <div class="bg-cupra-card border border-cupra-border rounded-xl p-3.5 space-y-2.5">
+                    <div class="font-bold text-white"><i class="fa-solid fa-file-code text-cupra-copperLight mr-1.5"></i>App File &amp; Garage Data Backups</div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" onclick="downloadIndexHtmlFile()" class="px-3.5 py-2 rounded-xl copper-grad text-slate-950 font-bold shadow">
+                            <i class="fa-solid fa-file-arrow-down mr-1.5"></i>Download App as index.html
+                        </button>
+                        <button type="button" onclick="exportJson()" class="px-3 py-2 rounded-xl bg-cupra-bg border border-cupra-border text-gray-200">
+                            <i class="fa-solid fa-download mr-1"></i>Export Backup (.JSON)
+                        </button>
+                        <label class="cursor-pointer px-3 py-2 rounded-xl bg-cupra-bg border border-cupra-border text-gray-200">
+                            <i class="fa-solid fa-upload mr-1"></i>Import Backup
+                            <input type="file" accept=".json" onchange="importJson(event)" class="hidden">
+                        </label>
+                    </div>
+                    <div class="pt-2 border-t border-cupra-border flex justify-end">
+                        <button type="button" onclick="openWipeConfirmModal()" class="px-3 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/40 text-red-300 font-semibold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Wipe All Garage Data</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 4B: TWO-STEP WARNING & CONFIRMATION FOR WIPE ALL GARAGE DATA (#3) -->
+    <!-- MODAL 4B: TWO-STEP WARNING & CONFIRMATION FOR WIPE ALL GARAGE DATA -->
     <div id="wipeConfirmModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-cupra-surface border-2 border-red-500/60 rounded-2xl max-w-md w-full p-5 space-y-4 text-xs shadow-2xl">
             <div class="flex items-center gap-3 text-red-400">
@@ -494,7 +535,7 @@
         </div>
     </div>
 
-    <!-- MODAL 5: LOG COMPLETED SERVICE -->
+    <!-- MODAL 5: LOG COMPLETED SERVICE (WITH "Part cost (€)" AND EMPTY NOTES) -->
     <div id="logModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-cupra-surface border border-cupra-border rounded-2xl max-w-md w-full p-5 space-y-3 text-xs">
             <div class="flex items-center justify-between border-b border-cupra-border pb-2">
@@ -505,9 +546,9 @@
                 <input id="logTaskId" type="hidden">
                 <div id="logCustomNameBox" class="hidden">
                     <label class="block text-gray-400 mb-1">Service / Repair Name *</label>
-                    <input id="logCustomName" type="text" placeholder="e.g. Oil & Filter Service" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white">
+                    <input id="logCustomName" type="text" placeholder="e.g. Front Brake Pads Replacement" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white">
                 </div>
-                <div class="grid grid-cols-2 gap-2.5">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                     <div>
                         <label class="block text-gray-400 mb-1">Date Completed *</label>
                         <input id="logDate" type="date" required class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white font-mono">
@@ -516,39 +557,44 @@
                         <label class="block text-gray-400 mb-1">Odometer (km) *</label>
                         <input id="logKm" type="number" required class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white font-mono">
                     </div>
+                    <div>
+                        <label class="block text-gray-400 mb-1">Part cost (€)</label>
+                        <input id="logPartCost" type="number" step="0.01" min="0" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white font-mono">
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-gray-400 mb-1">Parts / Oil / Notes</label>
-                    <input id="logNotes" type="text" placeholder="Optional notes, part numbers, or oil spec..." class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white">
+                    <label class="block text-gray-400 mb-1">Notes</label>
+                    <textarea id="logNotesInput" rows="3" placeholder="" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white"></textarea>
                 </div>
                 <div class="flex justify-end gap-2 pt-2">
                     <button type="button" onclick="closeModal('logModal')" class="px-4 py-2 rounded-xl bg-cupra-card text-gray-300">Cancel</button>
-                    <button type="submit" class="px-5 py-2 rounded-xl copper-grad text-white font-semibold">Save Record</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl copper-grad text-slate-950 font-bold">Save Record</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL 6: ADD MAINTENANCE INTERVAL -->
+    <!-- MODAL 6: ADD / EDIT MAINTENANCE INTERVAL -->
     <div id="taskModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-cupra-surface border border-cupra-border rounded-2xl max-w-md w-full p-5 space-y-3 text-xs">
             <div class="flex items-center justify-between border-b border-cupra-border pb-2">
-                <h3 class="font-display font-bold text-base text-white">Add Maintenance Interval</h3>
-                <button onclick="closeModal('taskModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                <h3 id="taskModalHeader" class="font-display font-bold text-base text-white">Add Maintenance Interval</h3>
+                <button type="button" onclick="closeModal('taskModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form onsubmit="submitTaskForm(event)" class="space-y-3">
+                <input id="editTaskId" type="hidden">
                 <div>
                     <label class="block text-gray-400 mb-1">Maintenance Item Name *</label>
-                    <input id="newTaskName" type="text" required placeholder="e.g. Engine Oil & Filter" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white">
+                    <input id="newTaskName" type="text" required placeholder="e.g. Haldex / AWD Clutch Oil" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white">
                 </div>
                 <div class="grid grid-cols-2 gap-2.5">
                     <div>
                         <label class="block text-gray-400 mb-1">Interval Distance (km) *</label>
-                        <input id="newTaskKm" type="number" required placeholder="e.g. 15000" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white font-mono">
+                        <input id="newTaskKm" type="number" required placeholder="e.g. 60000" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white font-mono">
                     </div>
                     <div>
                         <label class="block text-gray-400 mb-1">Interval Time (Months) *</label>
-                        <input id="newTaskMonths" type="number" required placeholder="e.g. 12" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white font-mono">
+                        <input id="newTaskMonths" type="number" required placeholder="e.g. 36" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white font-mono">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2.5">
@@ -562,28 +608,45 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-gray-400 mb-1">Specs / Notes (Optional)</label>
-                    <input id="newTaskSpec" type="text" placeholder="e.g. VW 508 00 0W-20 4.3L" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white font-mono">
+                    <label class="block text-gray-400 mb-1">Spec / Notes (Optional)</label>
+                    <input id="newTaskSpec" type="text" placeholder="e.g. OEM norm, capacity, or torque..." class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white font-mono">
                 </div>
                 <div class="flex justify-end gap-2 pt-2">
                     <button type="button" onclick="closeModal('taskModal')" class="px-4 py-2 rounded-xl bg-cupra-card text-gray-300">Cancel</button>
-                    <button type="submit" class="px-5 py-2 rounded-xl copper-grad text-white font-semibold">Add Interval</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl copper-grad text-slate-950 font-bold">Save Interval</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL 7: CREATE OFFLINE GUIDE -->
-    <div id="guideModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <!-- MODAL 7: CREATE OR EDIT OFFLINE GUIDE -->
+    <div id="guideModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-cupra-surface border border-cupra-border rounded-2xl max-w-lg w-full p-5 space-y-3 text-xs">
-            <h3 class="font-display font-bold text-base text-white">Save Offline Workshop Guide</h3>
+            <div class="flex items-center justify-between border-b border-cupra-border pb-2">
+                <h3 id="guideModalHeader" class="font-display font-bold text-base text-white">Save Offline Workshop Guide</h3>
+                <button type="button" onclick="closeModal('guideModal')" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
             <form onsubmit="submitGuideForm(event)" class="space-y-3">
-                <input id="gTitle" type="text" required placeholder="Procedure Title" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white">
-                <input id="gTorque" type="text" placeholder="Torques, Tools & Parts (Optional)" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white font-mono">
-                <textarea id="gSteps" rows="6" required placeholder="Enter steps (one step per line)..." class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white"></textarea>
-                <div class="flex justify-end gap-2">
+                <input id="editGuideId" type="hidden">
+                <div>
+                    <label class="block text-gray-400 mb-1">Procedure Title *</label>
+                    <input id="gTitle" type="text" required placeholder="e.g. Engine Oil & Filter Change Procedure" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white font-semibold">
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-1">Category (Optional)</label>
+                    <input id="gCategory" type="text" placeholder="e.g. Engine, Transmission, Brakes, Electrical..." class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white">
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-1">Torques, Fluid Norms &amp; Tools (Optional)</label>
+                    <input id="gTorque" type="text" placeholder="e.g. Drain Plug: 30 Nm • Filter Housing: 25 Nm • VW 508 00 4.3L" class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white font-mono">
+                </div>
+                <div>
+                    <label class="block text-gray-400 mb-1">Step-by-Step Instructions (One step per line) *</label>
+                    <textarea id="gSteps" rows="7" required placeholder="Enter steps (one step per line)..." class="w-full bg-cupra-bg border border-cupra-border rounded-xl px-3 py-2 text-white leading-relaxed"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-2 border-t border-cupra-border">
                     <button type="button" onclick="closeModal('guideModal')" class="px-4 py-2 rounded-xl bg-cupra-card text-gray-300">Cancel</button>
-                    <button type="submit" class="px-5 py-2 rounded-xl copper-grad text-white font-semibold">Save Guide</button>
+                    <button id="guideSubmitBtn" type="submit" class="px-5 py-2 rounded-xl copper-grad text-slate-950 font-bold">Save Guide</button>
                 </div>
             </form>
         </div>
@@ -593,16 +656,23 @@
     <div id="toast" class="hidden fixed bottom-20 lg:bottom-6 right-4 z-50 bg-cupra-card border border-cupra-copper text-white px-4 py-2.5 rounded-xl shadow-2xl text-xs font-semibold"></div>
 
     <script>
-        // BUMPED STORAGE & CACHE VERSION TO v3 SO GITHUB PAGES LOAD IS 100% CLEAN (#1, #2)
+        // LOCKED STORAGE KEYS FOR ZERO-LOSS APP UPDATES (Option 1 + Option 2 + Option 3)
         const STORAGE_KEY = "dgm_garage_v3_clean";
-        const CACHE_VERSION = "dgm-cache-v3";
-        const API_KEY_STORAGE = "klemen_gemini_api_key";
-        const FIREBASE_CFG = { apiKey: "AIzaSyAsa1rlxj4C8C20DZKhdX1I-awtBgqlYcc", authDomain: "my-garage-sync.firebaseapp.com", projectId: "my-garage-sync", storageBucket: "my-garage-sync.firebasestorage.app", messagingSenderId: "902370044052", appId: "1:902370044052:web:ac4e34b29b44f469562c81" };
+        const SYNC_ROOM_KEY = "dgm_sync_room_v3";
+        const API_KEY_STORAGE = "dgm_gemini_api_key";
+        const LEGACY_API_KEY_STORAGE = "klemen_gemini_api_key";
+        const FIREBASE_CFG = {
+            apiKey: "AIzaSyAsa1rlxj4C8C20DZKhdX1I-awtBgqlYcc",
+            authDomain: "my-garage-sync.firebaseapp.com",
+            projectId: "my-garage-sync",
+            storageBucket: "my-garage-sync.firebasestorage.app",
+            messagingSenderId: "902370044052",
+            appId: "1:902370044052:web:ac4e34b29b44f469562c81"
+        };
 
-        // Engine presets with engine codes built right in (#7)
         const VAG_ENG = [
             "1.0 TSI 110 PS (DLAA)",
-            "1.5 TSI 150 PS (DPCA)",
+            "1.5 TSI 150 PS (DPCA - EA211 evo)",
             "1.5 eTSI 150 PS (DFYA / DXDB)",
             "2.0 TSI 190 PS (DNNA)",
             "2.0 TSI 245 PS (DNPA)",
@@ -626,11 +696,10 @@
         const DAC_ENG = ["1.0 TCe 90/100 ECO-G LPG", "1.3 TCe 130/150 PS", "1.6 Hybrid 140 PS", "1.5 Blue dCi 115 PS"];
         const ALF_ENG = ["2.0 Turbo Petrol 200/280 PS", "2.9 V6 Bi-Turbo Quadrifoglio 510 PS", "2.2 Turbo Diesel 160/210 PS"];
 
-        // Strictly ONE clean model name per dropdown line, NO bracketed chassis codes (#2, #3, #4)
         const CATALOG = {
             "Cupra": {
                 "Formentor": [
-                    "1.5 TSI 150 PS (DPCA)",
+                    "1.5 TSI 150 PS (DPCA - EA211 evo)",
                     "1.5 eTSI 150 PS Mild-Hybrid (DXDB)",
                     "2.0 TSI 190 PS 4Drive (DNNA)",
                     "2.0 TSI VZ 245 PS (DNPA)",
@@ -679,85 +748,179 @@
                 "Arona": ["1.0 TSI 95/115 PS", "1.5 TSI 150 PS (DPCA)"],
                 "Tarraco": VAG_ENG
             },
-            "BMW": {
-                "1 Series": BMW_ENG,
-                "3 Series": BMW_ENG,
-                "5 Series": BMW_ENG,
-                "X3": BMW_ENG,
-                "X5": BMW_ENG
-            },
-            "Mercedes-Benz": {
-                "A-Class": MB_ENG,
-                "C-Class": MB_ENG,
-                "E-Class": MB_ENG,
-                "GLC": MB_ENG
-            },
-            "Renault": {
-                "Clio": REN_ENG,
-                "Megane": REN_ENG,
-                "Captur": REN_ENG
-            },
-            "Peugeot": {
-                "208": PSA_ENG,
-                "308": PSA_ENG,
-                "3008": PSA_ENG
-            },
-            "Hyundai": {
-                "i20": HYU_ENG,
-                "i30": HYU_ENG,
-                "Tucson": HYU_ENG
-            },
-            "Kia": {
-                "Ceed": HYU_ENG,
-                "Sportage": HYU_ENG
-            },
-            "Toyota": {
-                "Corolla": TOY_ENG,
-                "Yaris": TOY_ENG,
-                "RAV4": TOY_ENG
-            },
-            "Ford": {
-                "Focus": FRD_ENG,
-                "Fiesta": FRD_ENG,
-                "Kuga": FRD_ENG
-            },
-            "Volvo": {
-                "XC40": VOL_ENG,
-                "XC60": VOL_ENG
-            },
-            "Mazda": {
-                "Mazda3": MAZ_ENG,
-                "CX-5": MAZ_ENG
-            },
-            "Opel": {
-                "Astra": OPL_ENG,
-                "Corsa": OPL_ENG
-            },
-            "Dacia": {
-                "Duster": DAC_ENG,
-                "Sandero": DAC_ENG
-            },
-            "Alfa Romeo": {
-                "Giulia": ALF_ENG,
-                "Stelvio": ALF_ENG
-            }
+            "BMW": { "1 Series": BMW_ENG, "3 Series": BMW_ENG, "5 Series": BMW_ENG, "X3": BMW_ENG, "X5": BMW_ENG },
+            "Mercedes-Benz": { "A-Class": MB_ENG, "C-Class": MB_ENG, "E-Class": MB_ENG, "GLC": MB_ENG },
+            "Renault": { "Clio": REN_ENG, "Megane": REN_ENG, "Captur": REN_ENG },
+            "Peugeot": { "208": PSA_ENG, "308": PSA_ENG, "3008": PSA_ENG },
+            "Hyundai": { "i20": HYU_ENG, "i30": HYU_ENG, "Tucson": HYU_ENG },
+            "Kia": { "Ceed": HYU_ENG, "Sportage": HYU_ENG },
+            "Toyota": { "Corolla": TOY_ENG, "Yaris": TOY_ENG, "RAV4": TOY_ENG },
+            "Ford": { "Focus": FRD_ENG, "Fiesta": FRD_ENG, "Kuga": FRD_ENG },
+            "Volvo": { "XC40": VOL_ENG, "XC60": VOL_ENG },
+            "Mazda": { "Mazda3": MAZ_ENG, "CX-5": MAZ_ENG },
+            "Opel": { "Astra": OPL_ENG, "Corsa": OPL_ENG },
+            "Dacia": { "Duster": DAC_ENG, "Sandero": DAC_ENG },
+            "Alfa Romeo": { "Giulia": ALF_ENG, "Stelvio": ALF_ENG }
         };
 
-        // 100% BLANK SLATE BY DEFAULT (0 CARS, 0 PRE-MADE INSTRUCTIONS)
-        let state = { view: "garage", activeId: null, wsTab: "schedule", filter: "all", checked: {}, updated: Date.now(), cars: [] };
+        let state = { view: "garage", activeId: null, wsTab: "schedule", filter: "all", checked: {}, updated: 0, cars: [] };
         let db = null, tempPhoto = "", quickPhotoCarId = null, carToRemoveId = null, lastAiText = "", deferredPrompt = null;
 
-        function getCar() { return state.cars.find(c => c.id === state.activeId) || null; }
-
-        // Determine factory default oil interval for any car profile (#5)
-        function getFactoryOilDefault(car) {
-            const eng = (car?.engine || "").toLowerCase();
-            if (eng.includes("electric") || eng.includes("e-boost")) return { km: 30000, months: 24 };
-            if (eng.includes("vz5") || eng.includes("dnwb") || eng.includes("rs3") || eng.includes("quadrifoglio")) return { km: 15000, months: 12 };
-            return { km: 15000, months: 12 };
+        function getStoredApiKey() {
+            return (localStorage.getItem(API_KEY_STORAGE) || localStorage.getItem(LEGACY_API_KEY_STORAGE) || "").trim();
         }
 
-        // PROFESSIONAL STUDIO GENERIC CAR SILHOUETTE (#9)
+        function getCar() {
+            return state.cars.find(c => c.id === state.activeId) || null;
+        }
+
+        function createDefaultIntervalsForCar(car) {
+            const baseDate = car.createdAt || new Date().toISOString().split("T")[0];
+            const oilMode = car.oilRegimeMode || "factory_longlife";
+            const oilKm = oilMode === "fixed" ? 15000 : oilMode === "custom" ? (Number(car.oilCustomKm) || 30000) : 30000;
+            const oilMos = oilMode === "fixed" ? 12 : oilMode === "custom" ? (Number(car.oilCustomMonths) || 24) : 24;
+            const tStamp = Date.now();
+            return [
+                {
+                    id: "t_oil_" + tStamp,
+                    name: "Engine Oil & Oil Filter",
+                    isOilService: true,
+                    km: oilKm,
+                    months: oilMos,
+                    lastKm: 0,
+                    lastDate: baseDate,
+                    spec: "Factory LongLife (30,000 km / 24 mos) or Fixed (15,000 km / 12 mos)"
+                },
+                {
+                    id: "t_cab_" + (tStamp + 1),
+                    name: "Cabin Dust & Pollen Filter",
+                    km: 60000,
+                    months: 24,
+                    lastKm: 0,
+                    lastDate: baseDate,
+                    spec: "Activated carbon / interior cabin air filter element"
+                },
+                {
+                    id: "t_air_" + (tStamp + 2),
+                    name: "Engine Air Filter Element",
+                    km: 90000,
+                    months: 72,
+                    lastKm: 0,
+                    lastDate: baseDate,
+                    spec: "Intake air filter cartridge & housing cleaning"
+                },
+                {
+                    id: "t_spk_" + (tStamp + 3),
+                    name: "Spark Plugs / Ignition Service",
+                    km: 60000,
+                    months: 48,
+                    lastKm: 0,
+                    lastDate: baseDate,
+                    spec: "Spark plugs (Petrol/TSI) or Glow Plug / Fuel Filter check (TDI)"
+                },
+                {
+                    id: "t_brk_" + (tStamp + 4),
+                    name: "Brake Fluid Flush & Bleed",
+                    km: 30000,
+                    months: 24,
+                    lastKm: 0,
+                    lastDate: baseDate,
+                    spec: "DOT 4 LV / hydraulic brake & clutch system bleed"
+                },
+                {
+                    id: "t_gbx_" + (tStamp + 5),
+                    name: "Transmission / DSG Gearbox Fluid & Filter",
+                    isGearboxService: true,
+                    km: 120000,
+                    months: 72,
+                    lastKm: 0,
+                    lastDate: baseDate,
+                    spec: "Factory 120,000 km (or 60,000 km preventative wet-clutch DSG service)"
+                },
+                {
+                    id: "t_ins_" + (tStamp + 6),
+                    name: "General Vehicle Inspection",
+                    km: 30000,
+                    months: 24,
+                    lastKm: 0,
+                    lastDate: baseDate,
+                    spec: "Suspension, steering, lighting, underbody, fault memory & battery check"
+                },
+                {
+                    id: "t_blt_" + (tStamp + 7),
+                    name: "Timing Belt & Auxiliary Poly V-Belt Check",
+                    km: 120000,
+                    months: 72,
+                    lastKm: 0,
+                    lastDate: baseDate,
+                    spec: "Camshaft drive belt, water pump & accessory drive belt inspection"
+                },
+                {
+                    id: "t_pad_" + (tStamp + 8),
+                    name: "Brake Pads, Discs & Coolant Inspection",
+                    km: 15000,
+                    months: 12,
+                    lastKm: 0,
+                    lastDate: baseDate,
+                    spec: "Pad thickness, rotor wear lip, tire tread & G12evo coolant level (-25°C)"
+                }
+            ];
+        }
+
+        // ZERO-LOSS SCHEMA MIGRATOR: Preserves existing vehicles, tasks, logs, and guides across updates
+        function migrateAndNormalizeGarageState(raw) {
+            if (!raw || typeof raw !== "object") return state;
+            const rawCars = Array.isArray(raw.cars) ? raw.cars : (Array.isArray(raw.vehicles) ? raw.vehicles : []);
+            const normalizedCars = rawCars.map((c, idx) => {
+                const createdAt = c.createdAt || new Date().toISOString().split("T")[0];
+                const carObj = {
+                    id: c.id || ("car_" + Date.now() + "_" + idx),
+                    name: c.name || `${c.year || ""} ${c.make || ""} ${c.model || ""}`.trim() || "Vehicle",
+                    make: c.make || "",
+                    model: c.model || "",
+                    year: Number(c.year) || new Date().getFullYear(),
+                    engine: c.engine || "",
+                    gearboxType: c.gearboxType || "",
+                    gearboxDef: c.gearboxDef || "",
+                    gearbox: c.gearbox || "",
+                    odometer: Number(c.odometer) || 0,
+                    nickname: c.nickname || "",
+                    vin: c.vin || "",
+                    oilRegimeMode: c.oilRegimeMode || "factory_longlife",
+                    oilCustomKm: Number(c.oilCustomKm) || 30000,
+                    oilCustomMonths: Number(c.oilCustomMonths) || 24,
+                    createdAt,
+                    imageUrl: c.imageUrl || c.photo || "",
+                    tasks: Array.isArray(c.tasks) ? c.tasks : [],
+                    guides: Array.isArray(c.guides) ? c.guides : [],
+                    history: Array.isArray(c.history) ? c.history : (Array.isArray(c.logs) ? c.logs : [])
+                };
+                if (carObj.tasks.length === 0) {
+                    carObj.tasks = createDefaultIntervalsForCar(carObj);
+                }
+                // Normalize history items to support partCost
+                carObj.history = carObj.history.map((h, hIdx) => ({
+                    id: h.id || ("h_" + Date.now() + "_" + hIdx),
+                    date: h.date || createdAt,
+                    km: Number(h.km ?? h.odometer) || 0,
+                    title: h.title || h.taskName || "Service Entry",
+                    partCost: h.partCost !== undefined ? h.partCost : (h.cost !== undefined ? h.cost : ""),
+                    notes: h.notes || ""
+                }));
+                return carObj;
+            });
+
+            return {
+                view: raw.view === "workspace" ? "workspace" : "garage",
+                activeId: raw.activeId || raw.activeVehicleId || (normalizedCars[0]?.id || null),
+                wsTab: ["schedule", "guides", "ai"].includes(raw.wsTab) ? raw.wsTab : "schedule",
+                filter: raw.filter || "all",
+                checked: raw.checked && typeof raw.checked === "object" ? raw.checked : {},
+                updated: Number(raw.updated || raw.updatedAt) || Date.now(),
+                cars: normalizedCars
+            };
+        }
+
         function buildCarSvg(car) {
             if (car?.imageUrl) return car.imageUrl;
             const mk = (car?.make || "DIGITAL GARAGE").toUpperCase();
@@ -766,59 +929,65 @@
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320">
                 <defs>
                     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#0d1117"/>
-                        <stop offset="55%" stop-color="#161d27"/>
-                        <stop offset="100%" stop-color="#0b0e14"/>
+                        <stop offset="0%" stop-color="#0b0e13"/>
+                        <stop offset="55%" stop-color="#141a23"/>
+                        <stop offset="100%" stop-color="#090b0f"/>
                     </linearGradient>
-                    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#1e2633"/>
-                        <stop offset="35%" stop-color="#2e3a4e"/>
-                        <stop offset="70%" stop-color="#232c3b"/>
-                        <stop offset="100%" stop-color="#151b24"/>
+                    <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="15%">
+                        <stop offset="0%" stop-color="#1b222d"/>
+                        <stop offset="40%" stop-color="#2c3748"/>
+                        <stop offset="75%" stop-color="#1f2733"/>
+                        <stop offset="100%" stop-color="#121720"/>
                     </linearGradient>
-                    <linearGradient id="copperAccent" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#d48c46"/>
-                        <stop offset="100%" stop-color="#b87333"/>
+                    <linearGradient id="copperGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#e09f7d"/>
+                        <stop offset="100%" stop-color="#c87d55"/>
                     </linearGradient>
                     <linearGradient id="glassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stop-color="#1e293b" stop-opacity="0.95"/>
-                        <stop offset="100%" stop-color="#090c10" stop-opacity="0.98"/>
+                        <stop offset="0%" stop-color="#1e293b"/>
+                        <stop offset="100%" stop-color="#090d14"/>
                     </linearGradient>
                 </defs>
                 <rect width="640" height="320" fill="url(#bgGrad)"/>
-                <!-- Subtle Studio Horizon & Floor Reflection -->
-                <line x1="0" y1="246" x2="640" y2="246" stroke="#263040" stroke-width="1"/>
-                <ellipse cx="320" cy="248" rx="245" ry="14" fill="#000000" opacity="0.65"/>
-                <ellipse cx="320" cy="252" rx="190" ry="5" fill="#d48c46" opacity="0.12"/>
-                <!-- Studio Typography -->
-                <text x="34" y="42" fill="#d48c46" font-family="Chakra Petch, Inter, sans-serif" font-size="12" font-weight="700" letter-spacing="3">${mk} ${yr}</text>
+                <line x1="0" y1="248" x2="640" y2="248" stroke="#263142" stroke-width="1"/>
+                <ellipse cx="325" cy="250" rx="260" ry="12" fill="#000000" opacity="0.75"/>
+                <ellipse cx="325" cy="252" rx="200" ry="4" fill="#e09f7d" opacity="0.16"/>
+                <text x="34" y="42" fill="#e09f7d" font-family="Chakra Petch, Inter, sans-serif" font-size="12" font-weight="700" letter-spacing="3">${mk} ${yr}</text>
                 <text x="34" y="70" fill="#f3f4f6" font-family="Chakra Petch, Inter, sans-serif" font-size="24" font-weight="700" letter-spacing="1">${md}</text>
-                <!-- Sleek Aerodynamic Fastback / Crossover Body Silhouette -->
-                <path d="M78 214 C76 196 84 180 102 172 L168 154 C196 146 226 116 266 105 C312 93 398 94 452 110 C486 120 518 144 544 156 C562 164 570 180 568 206 C567 214 558 218 545 218 L92 218 C82 218 79 216 78 214 Z" fill="url(#bodyGrad)" stroke="#475569" stroke-width="1.2"/>
-                <!-- Upper Roofline & Copper Character Crease -->
-                <path d="M174 153 C210 120 258 100 326 98 C394 96 456 112 508 146" fill="none" stroke="url(#copperAccent)" stroke-width="2" opacity="0.85"/>
-                <path d="M126 184 C230 174 375 172 536 178" fill="none" stroke="#d48c46" stroke-width="1.2" opacity="0.55"/>
-                <!-- Flush Greenhouse / Side Windows -->
-                <path d="M204 150 C232 125 268 110 318 108 L354 108 L348 150 Z" fill="url(#glassGrad)" stroke="#64748b" stroke-width="0.8"/>
-                <path d="M362 108 C408 110 452 123 486 148 L356 150 Z" fill="url(#glassGrad)" stroke="#64748b" stroke-width="0.8"/>
-                <!-- LED Headlight & Taillight Signatures -->
-                <path d="M84 182 L116 174 L112 184 L84 188 Z" fill="#f8fafc"/>
-                <path d="M84 188 L114 184" stroke="#d48c46" stroke-width="2.5"/>
-                <path d="M542 166 L565 174 L564 184 L538 178 Z" fill="#ef4444"/>
-                <!-- Wheel Arches & Precision Multi-Spoke Wheels -->
-                <circle cx="176" cy="216" r="41" fill="#0b0e14"/>
-                <circle cx="176" cy="216" r="35" fill="#131822" stroke="#334155" stroke-width="4"/>
-                <circle cx="176" cy="216" r="25" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="8 6"/>
-                <circle cx="176" cy="216" r="19" fill="none" stroke="#d48c46" stroke-width="2"/>
-                <path d="M164 204 A16 16 0 0 1 188 204" fill="none" stroke="#b87333" stroke-width="4.5"/>
-                <circle cx="176" cy="216" r="6" fill="#d48c46"/>
-
-                <circle cx="466" cy="216" r="41" fill="#0b0e14"/>
-                <circle cx="466" cy="216" r="35" fill="#131822" stroke="#334155" stroke-width="4"/>
-                <circle cx="466" cy="216" r="25" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="8 6"/>
-                <circle cx="466" cy="216" r="19" fill="none" stroke="#d48c46" stroke-width="2"/>
-                <path d="M454 204 A16 16 0 0 1 478 204" fill="none" stroke="#b87333" stroke-width="4.5"/>
-                <circle cx="466" cy="216" r="6" fill="#d48c46"/>
+                <path d="M58 214 L66 184 L82 168 L208 150 L282 108 L434 106 L546 144 L574 140 L568 156 L582 174 L576 212 L536 218 L48 218 L58 214 Z" fill="url(#bodyGrad)" stroke="#475569" stroke-width="1.3"/>
+                <path d="M46 218 L118 218 L112 211 L52 211 Z" fill="url(#copperGrad)"/>
+                <path d="M226 217 L414 217 L410 211 L230 211 Z" fill="#11161f" stroke="#e09f7d" stroke-width="1"/>
+                <path d="M524 217 L578 212 L572 204 L528 209 Z" fill="#0f131a" stroke="#e09f7d" stroke-width="1"/>
+                <path d="M84 170 L212 153 L285 111 L432 109 L548 146" fill="none" stroke="url(#copperGrad)" stroke-width="2" opacity="0.9"/>
+                <path d="M98 182 L564 166" fill="none" stroke="#e09f7d" stroke-width="1.4" opacity="0.65"/>
+                <path d="M224 198 L402 188 L428 172" fill="none" stroke="#64748b" stroke-width="1.2" opacity="0.7"/>
+                <polygon points="222,149 286,114 364,113 356,149" fill="url(#glassGrad)" stroke="#64748b" stroke-width="0.9"/>
+                <polygon points="372,113 428,113 508,145 364,149" fill="url(#glassGrad)" stroke="#64748b" stroke-width="0.9"/>
+                <polygon points="66,184 106,175 98,187 64,190" fill="#f8fafc"/>
+                <polyline points="65,190 96,187 106,176" fill="none" stroke="#e09f7d" stroke-width="2.5"/>
+                <polygon points="552,154 580,162 578,173 546,166" fill="#ef4444"/>
+                <circle cx="168" cy="215" r="42" fill="#090c11"/>
+                <circle cx="168" cy="215" r="36" fill="#11161f" stroke="#334155" stroke-width="4"/>
+                <path d="M144 198 A26 26 0 0 1 164 189" fill="none" stroke="#b11226" stroke-width="6"/>
+                <circle cx="168" cy="215" r="27" fill="none" stroke="#e09f7d" stroke-width="2"/>
+                <g stroke="#cbd5e1" stroke-width="2">
+                    <line x1="168" y1="188" x2="168" y2="242"/>
+                    <line x1="141" y1="215" x2="195" y2="215"/>
+                    <line x1="149" y1="196" x2="187" y2="234"/>
+                    <line x1="187" y1="196" x2="149" y2="234"/>
+                </g>
+                <circle cx="168" cy="215" r="8" fill="#11161f" stroke="#e09f7d" stroke-width="2.5"/>
+                <circle cx="468" cy="215" r="42" fill="#090c11"/>
+                <circle cx="468" cy="215" r="36" fill="#11161f" stroke="#334155" stroke-width="4"/>
+                <path d="M444 198 A26 26 0 0 1 464 189" fill="none" stroke="#b11226" stroke-width="6"/>
+                <circle cx="468" cy="215" r="27" fill="none" stroke="#e09f7d" stroke-width="2"/>
+                <g stroke="#cbd5e1" stroke-width="2">
+                    <line x1="468" y1="188" x2="468" y2="242"/>
+                    <line x1="441" y1="215" x2="495" y2="215"/>
+                    <line x1="449" y1="196" x2="487" y2="234"/>
+                    <line x1="487" y1="196" x2="449" y2="234"/>
+                </g>
+                <circle cx="468" cy="215" r="8" fill="#11161f" stroke="#e09f7d" stroke-width="2.5"/>
             </svg>`;
             return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
         }
@@ -859,7 +1028,7 @@
             const parts = [];
             if (car.gearboxType) parts.push(car.gearboxType);
             if (car.gearboxDef) parts.push(car.gearboxDef);
-            if (!parts.length && car.gearbox) parts.push(car.gearbox);
+            if (!parts.length && car.gearbox && car.gearbox !== "Not specified") parts.push(car.gearbox);
             return parts.length ? parts.join(" • ") : "Transmission not specified";
         }
 
@@ -872,12 +1041,33 @@
             document.getElementById("hdrSubtitle").textContent = isGarage ? "My Digital Garage" : car.name;
             document.getElementById("garageView").classList.toggle("hidden", !isGarage);
             document.getElementById("workspaceView").classList.toggle("hidden", isGarage);
-            document.getElementById("backToGarageBtn").classList.toggle("hidden", isGarage);
-            document.getElementById("hdrOdoBox").classList.toggle("hidden", isGarage);
+
+            // Sync Top & Bottom Navigation Active Highlights (Zero font-weight shift, clear dark icon on active copper pill)
+            const activeNav = isGarage ? "garage" : (state.wsTab || "schedule");
+            ["garage", "schedule", "guides", "ai"].forEach(k => {
+                const topBtn = document.getElementById("topNav-" + k);
+                const topIcon = document.getElementById("topNavIcon-" + k);
+                const botBtn = document.getElementById("botNav-" + k);
+                const isAct = (k === activeNav);
+
+                if (topBtn) {
+                    topBtn.className = isAct
+                        ? "px-3.5 py-1.5 rounded-lg text-xs font-bold copper-grad text-slate-950 flex items-center gap-1.5 transition whitespace-nowrap"
+                        : "px-3.5 py-1.5 rounded-lg text-xs font-bold text-gray-300 hover:text-white flex items-center gap-1.5 transition whitespace-nowrap";
+                }
+                if (topIcon) {
+                    const iconBase = k === "garage" ? "fa-warehouse" : k === "schedule" ? "fa-calendar-check" : k === "guides" ? "fa-book-wrench" : "fa-wand-magic-sparkles";
+                    topIcon.className = `fa-solid ${iconBase} ${isAct ? "text-slate-950" : "text-cupra-copperLight"}`;
+                }
+                if (botBtn) {
+                    botBtn.className = isAct
+                        ? "py-1.5 rounded-xl flex flex-col items-center text-cupra-copperLight bg-cupra-card border border-cupra-copper/40 font-bold transition"
+                        : "py-1.5 rounded-xl flex flex-col items-center text-gray-300 hover:text-white font-bold transition";
+                }
+            });
 
             renderGarageCards();
             if (car && !isGarage) {
-                document.getElementById("hdrOdoInput").value = car.odometer;
                 const largeOdo = document.getElementById("wsOdoLargeInput");
                 if (largeOdo) largeOdo.value = car.odometer;
                 renderWorkspace(car);
@@ -889,14 +1079,14 @@
             if (state.cars.length === 0) {
                 grid.innerHTML = `
                 <div class="col-span-full bg-cupra-surface border-2 border-dashed border-cupra-border rounded-2xl p-10 flex flex-col items-center justify-center text-center space-y-4">
-                    <div class="w-16 h-16 rounded-2xl copper-grad flex items-center justify-center text-white text-2xl shadow-lg">
+                    <div class="w-16 h-16 rounded-2xl copper-grad flex items-center justify-center text-slate-950 text-2xl shadow-lg">
                         <i class="fa-solid fa-car-side"></i>
                     </div>
                     <div class="space-y-1 max-w-md">
                         <h2 class="font-display font-bold text-2xl text-white">Your Digital Garage is Empty</h2>
-                        <p class="text-xs sm:text-sm text-gray-400">Start with a clean slate. Click below to add your first vehicle profile—no pre-made assumptions or unrelated instructions.</p>
+                        <p class="text-xs sm:text-sm text-gray-400">Add a vehicle below or click <strong>Settings &rarr; Restore from Cloud</strong> if you have existing vehicles saved in your Firebase vault.</p>
                     </div>
-                    <button onclick="openVehicleModal()" class="px-6 py-3 rounded-xl copper-grad text-white text-sm font-display font-bold uppercase tracking-wider shadow-lg flex items-center gap-2">
+                    <button onclick="openVehicleModal()" class="px-6 py-3 rounded-xl copper-grad text-slate-950 text-sm font-display font-bold uppercase tracking-wider shadow-lg flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i><span>Add Vehicle to Garage</span>
                     </button>
                 </div>`;
@@ -915,7 +1105,6 @@
                     <div>
                         <div class="relative h-48 bg-cupra-bg border-b border-cupra-border">
                             <img src="${buildCarSvg(c)}" class="w-full h-full object-cover" alt="${c.name}">
-                            <!-- LARGER ODOMETER BUBBLE ON GARAGE CARD (#6) -->
                             <div class="absolute top-3 left-3 px-3.5 py-1.5 rounded-xl bg-black/85 text-white font-mono text-base sm:text-lg font-bold border-2 border-cupra-copper/70 shadow-lg flex items-center gap-1.5">
                                 <i class="fa-solid fa-gauge-high text-cupra-copperLight text-sm"></i>
                                 <span>${Number(c.odometer).toLocaleString()}</span>
@@ -924,7 +1113,7 @@
                             <button onclick="confirmRemoveVehicle('${c.id}', event)" title="Remove Vehicle" class="absolute top-3 right-3 w-8 h-8 rounded-lg bg-black/80 hover:bg-red-600 text-red-300 hover:text-white flex items-center justify-center transition">
                                 <i class="fa-solid fa-trash-can text-xs"></i>
                             </button>
-                            <button onclick="triggerQuickPhoto('${c.id}', event)" class="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/80 hover:bg-cupra-copper text-white text-[11px] font-semibold">
+                            <button onclick="triggerQuickPhoto('${c.id}', event)" class="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/80 hover:bg-cupra-copper hover:text-slate-950 text-white text-[11px] font-semibold transition">
                                 <i class="fa-solid fa-camera mr-1"></i>Photo
                             </button>
                         </div>
@@ -952,7 +1141,7 @@
 
             grid.innerHTML = cards + `
                 <div onclick="openVehicleModal()" class="card-hover cursor-pointer bg-cupra-surface/50 border-2 border-dashed border-cupra-border hover:border-cupra-copper rounded-2xl p-6 flex flex-col items-center justify-center text-center min-h-[320px] gap-3">
-                    <div class="w-14 h-14 rounded-2xl copper-grad flex items-center justify-center text-white text-xl shadow"><i class="fa-solid fa-plus"></i></div>
+                    <div class="w-14 h-14 rounded-2xl copper-grad flex items-center justify-center text-slate-950 text-xl shadow"><i class="fa-solid fa-plus"></i></div>
                     <h3 class="font-display font-bold text-lg text-white">Add Vehicle to Garage</h3>
                     <p class="text-xs text-gray-400 max-w-xs">Select from single-model European dropdowns or type custom vehicle specs.</p>
                 </div>`;
@@ -961,104 +1150,165 @@
         function renderWorkspace(car) {
             document.getElementById("wsCarPhoto").src = buildCarSvg(car);
             document.getElementById("wsCarTitle").textContent = car.nickname ? `${car.name} (${car.nickname})` : car.name;
-            document.getElementById("wsCarSub").textContent = `${car.engine} • ${formatGearboxDisplay(car)}`;
+            document.getElementById("wsCarSub").textContent = `${car.engine} • ${formatGearboxDisplay(car)}${car.vin ? " • VIN: " + car.vin : ""}`;
 
-            // Oil Regime In-Profile Toggle Rendering (#5)
-            const defOil = getFactoryOilDefault(car);
-            const oilMode = car.oilRegimeMode || "factory";
-            const activeOilKm = oilMode === "custom" ? (Number(car.oilCustomKm) || defOil.km) : defOil.km;
-            const activeOilMos = oilMode === "custom" ? (Number(car.oilCustomMonths) || defOil.months) : defOil.months;
-
-            document.getElementById("wsCarMeta").textContent = `Oil Service Regime: ${oilMode === "custom" ? "Custom" : "Factory Spec"} (${activeOilKm.toLocaleString()} km / ${activeOilMos} mos)${car.vin ? " • VIN: " + car.vin : ""}`;
-
-            const fBtn = document.getElementById("oilModeFactoryBtn");
-            const cBtn = document.getElementById("oilModeCustomBtn");
-            const fLbl = document.getElementById("oilFactoryLabel");
-            const cBox = document.getElementById("oilCustomInputs");
-            if (fBtn && cBtn) {
-                fBtn.className = oilMode === "factory" ? "px-3 py-1 rounded-md text-xs font-semibold copper-grad text-white" : "px-3 py-1 rounded-md text-xs font-semibold text-gray-300 hover:text-white";
-                cBtn.className = oilMode === "custom" ? "px-3 py-1 rounded-md text-xs font-semibold copper-grad text-white" : "px-3 py-1 rounded-md text-xs font-semibold text-gray-300 hover:text-white";
-                fLbl.textContent = `Default: ${defOil.km.toLocaleString()} km / ${defOil.months} mos`;
-                fLbl.classList.toggle("hidden", oilMode === "custom");
-                cBox.classList.toggle("hidden", oilMode !== "custom");
-                document.getElementById("oilCustomKm").value = activeOilKm;
-                document.getElementById("oilCustomMonths").value = activeOilMos;
+            if (!Array.isArray(car.tasks) || car.tasks.length === 0) {
+                car.tasks = createDefaultIntervalsForCar(car);
+                saveState(false);
             }
+
+            // Style sub-tabs cleanly with high-contrast dark icons on active copper background
+            ["schedule", "guides", "ai"].forEach(t => {
+                const sec = document.getElementById("wsTab-" + t);
+                if (sec) sec.classList.toggle("hidden", state.wsTab !== t);
+                const b = document.getElementById("tabBtn-" + t);
+                const ic = document.getElementById("tabIcon-" + t);
+                const isAct = (state.wsTab === t);
+                if (b) {
+                    b.className = isAct
+                        ? "ws-tab-btn px-3.5 py-2 rounded-lg text-xs font-bold copper-grad text-slate-950 flex items-center gap-1.5 transition"
+                        : "ws-tab-btn px-3.5 py-2 rounded-lg text-xs font-bold text-gray-300 hover:bg-cupra-card flex items-center gap-1.5 transition";
+                }
+                if (ic) {
+                    const iconName = t === "schedule" ? "fa-calendar-check" : t === "guides" ? "fa-book-wrench" : "fa-wand-magic-sparkles";
+                    ic.className = `fa-solid ${iconName} ${isAct ? "text-slate-950" : "text-cupra-copperLight"}`;
+                }
+            });
+
+            const oilMode = car.oilRegimeMode || "factory_longlife";
 
             ["all", "overdue", "due-soon", "upcoming"].forEach(f => {
                 const b = document.getElementById("flt-" + f);
-                if (b) b.className = state.filter === f ? "px-3 py-1.5 rounded-lg text-xs font-semibold copper-grad text-white" : "px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-300";
+                if (b) b.className = state.filter === f ? "px-3 py-1.5 rounded-lg text-xs font-bold copper-grad text-slate-950" : "px-3 py-1.5 rounded-lg text-xs font-bold text-gray-300";
             });
 
             const tasks = car.tasks || [];
-            if (tasks.length === 0) {
+            const list = tasks.map(t => ({ t, ev: evalTask(t, car) })).filter(x => state.filter === "all" || x.ev.st === state.filter);
+            if (list.length === 0) {
                 document.getElementById("tasksGrid").innerHTML = `
-                <div class="col-span-full bg-cupra-surface border border-cupra-border rounded-2xl p-8 text-center space-y-3">
-                    <div class="text-cupra-copperLight text-2xl"><i class="fa-solid fa-clipboard-check"></i></div>
-                    <h4 class="font-display font-bold text-lg text-white">No Maintenance Intervals Added Yet</h4>
-                    <p class="text-xs text-gray-400 max-w-md mx-auto">This vehicle profile starts clean with no pre-made assumptions. Add intervals manually, load a standard template, or let Gemini AI build the factory schedule for your ${car.name}.</p>
-                    <div class="flex flex-wrap justify-center gap-2 pt-2">
-                        <button onclick="openTaskModal()" class="px-4 py-2 rounded-xl copper-grad text-white text-xs font-semibold">+ Add Maintenance Task</button>
-                        <button onclick="loadStandardTemplate()" class="px-4 py-2 rounded-xl bg-cupra-card border border-cupra-border text-xs text-gray-200">Load Standard Template</button>
-                        <button onclick="aiAutoBuildSchedule()" class="px-4 py-2 rounded-xl bg-cupra-card border border-cupra-copper/50 text-xs text-cupra-copperLight font-semibold"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Generate Factory Schedule with Gemini</button>
-                    </div>
+                <div class="bg-cupra-surface border border-cupra-border rounded-2xl p-6 text-center text-xs text-gray-400">
+                    No maintenance intervals match the selected filter. Click <strong>All Intervals</strong> to view all ${tasks.length} services.
                 </div>`;
             } else {
-                const list = tasks.map(t => ({ t, ev: evalTask(t, car) })).filter(x => state.filter === "all" || x.ev.st === state.filter);
                 document.getElementById("tasksGrid").innerHTML = list.map(({ t, ev }) => {
-                    const badge = ev.st === "overdue" ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-300 border border-red-500/40">OVERDUE</span>` : ev.st === "due-soon" ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">DUE SOON</span>` : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">UPCOMING / OK</span>`;
+                    const badge = ev.st === "overdue"
+                        ? `<span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-red-500/20 text-red-300 border border-red-500/40">OVERDUE</span>`
+                        : ev.st === "due-soon"
+                            ? `<span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">DUE SOON</span>`
+                            : `<span class="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">UPCOMING / OK</span>`;
+
+                    const isOilRow = !!t.isOilService || t.name.toLowerCase().includes("engine oil");
+                    const isGbxRow = !!t.isGearboxService || t.name.toLowerCase().includes("gearbox") || t.name.toLowerCase().includes("transmission");
+
+                    const oilInlineControls = isOilRow ? `
+                        <div class="mt-2.5 pt-2.5 border-t border-cupra-border/80 flex flex-wrap items-center justify-between gap-2 bg-cupra-bg/80 p-2.5 rounded-xl border border-cupra-copper/30 text-xs">
+                            <div class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-oil-can text-cupra-copperLight"></i>
+                                <span class="font-display font-bold uppercase tracking-wider text-gray-200">Oil Service Regime:</span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <button type="button" onclick="setOilRegimeMode('factory_longlife')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${oilMode === 'factory_longlife' ? 'copper-grad text-slate-950 shadow' : 'bg-cupra-surface text-gray-300 hover:text-white border border-cupra-border'}">
+                                    Factory Spec (30,000 km / 24m)
+                                </button>
+                                <button type="button" onclick="setOilRegimeMode('fixed')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${oilMode === 'fixed' ? 'copper-grad text-slate-950 shadow' : 'bg-cupra-surface text-gray-300 hover:text-white border border-cupra-border'}">
+                                    Fixed (15,000 km / 12m)
+                                </button>
+                                <button type="button" onclick="setOilRegimeMode('custom')" class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${oilMode === 'custom' ? 'copper-grad text-slate-950 shadow' : 'bg-cupra-surface text-gray-300 hover:text-white border border-cupra-border'}">
+                                    Custom
+                                </button>
+                            </div>
+                            ${oilMode === 'custom' ? `
+                            <div class="w-full sm:w-auto flex flex-wrap items-center gap-1.5 pt-1 sm:pt-0">
+                                <input id="oilCustomKm" type="number" step="1000" min="1000" value="${Number(car.oilCustomKm) || t.km || 30000}" class="w-24 bg-cupra-surface border border-cupra-copper rounded-lg px-2 py-1 font-mono font-bold text-white text-right">
+                                <span class="font-mono text-gray-400">km /</span>
+                                <input id="oilCustomMonths" type="number" step="1" min="1" value="${Number(car.oilCustomMonths) || t.months || 24}" class="w-16 bg-cupra-surface border border-cupra-copper rounded-lg px-2 py-1 font-mono font-bold text-white text-right">
+                                <span class="font-mono text-gray-400">mos</span>
+                                <button type="button" onclick="applyCustomOilRegime()" class="px-2.5 py-1 rounded-lg copper-grad text-slate-950 font-bold">Apply</button>
+                            </div>` : ''}
+                        </div>` : "";
+
+                    const gbxInlineControls = isGbxRow ? `
+                        <div class="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+                            <span class="text-gray-400 font-mono">Gearbox Interval Preset:</span>
+                            <button type="button" onclick="setGearboxInterval('${t.id}', 120000, 72)" class="px-2 py-0.5 rounded border ${Number(t.km) === 120000 ? 'border-cupra-copper bg-cupra-copper/20 text-cupra-copperLight font-semibold' : 'border-cupra-border bg-cupra-card text-gray-400'}">Factory 120,000 km</button>
+                            <button type="button" onclick="setGearboxInterval('${t.id}', 60000, 48)" class="px-2 py-0.5 rounded border ${Number(t.km) === 60000 ? 'border-cupra-copper bg-cupra-copper/20 text-cupra-copperLight font-semibold' : 'border-cupra-border bg-cupra-card text-gray-400'}">Preventative 60,000 km</button>
+                        </div>` : "";
+
                     return `
-                    <div class="bg-cupra-surface border ${ev.st === 'overdue' ? 'border-red-500/45' : 'border-cupra-border'} rounded-2xl p-4 flex flex-col justify-between gap-3">
-                        <div class="space-y-2">
-                            <div class="flex items-start justify-between gap-2">
-                                <div>
-                                    <div class="text-[10px] font-mono text-cupra-copperLight">Every ${Number(t.km).toLocaleString()} km / ${t.months} mos</div>
-                                    <h4 class="font-display font-bold text-base text-white">${t.name}</h4>
-                                </div>
-                                <div class="flex items-center gap-1.5">
+                    <div class="w-full bg-cupra-surface border ${ev.st === 'overdue' ? 'border-red-500/45' : 'border-cupra-border'} rounded-2xl p-4 transition hover:border-cupra-copper/60">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                            <div class="space-y-1 flex-1">
+                                <div class="flex flex-wrap items-center gap-2">
                                     ${badge}
-                                    <button onclick="deleteTask('${t.id}')" class="text-gray-500 hover:text-red-400 text-xs px-1" title="Delete Interval"><i class="fa-solid fa-trash-can"></i></button>
+                                    <h4 class="font-display font-bold text-base sm:text-lg text-white">${t.name}</h4>
+                                    <span class="text-xs font-mono px-2 py-0.5 rounded bg-cupra-card border border-cupra-border text-cupra-copperLight">Every ${Number(t.km).toLocaleString()} km / ${t.months} mos</span>
+                                </div>
+                                ${t.spec ? `<div class="text-xs font-mono text-gray-400">${t.spec}</div>` : ""}
+                                ${gbxInlineControls}
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row sm:items-center gap-3 lg:gap-4 shrink-0">
+                                <div class="text-xs font-mono bg-cupra-card/80 border border-cupra-border rounded-xl px-3 py-2 space-y-0.5">
+                                    <div class="${ev.remKm < 0 ? 'text-red-300 font-bold' : 'text-gray-200'}">
+                                        <i class="fa-solid fa-road text-cupra-copperLight mr-1"></i>${ev.remKm >= 0 ? ev.remKm.toLocaleString() + ' km left' : 'Overdue by ' + Math.abs(ev.remKm).toLocaleString() + ' km'} <span class="text-gray-400">(Due @ ${ev.dueKm.toLocaleString()} km)</span>
+                                    </div>
+                                    <div class="text-gray-300">
+                                        <i class="fa-regular fa-calendar text-cupra-copperLight mr-1"></i>Due ${ev.dueDate} • <span class="text-gray-400">Last: ${t.lastKm ? Number(t.lastKm).toLocaleString() + ' km (' + (t.lastDate || '—') + ')' : 'Not logged yet'}</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-1.5 self-end sm:self-center">
+                                    <button onclick="openTaskModal('${t.id}')" class="px-2.5 py-2 rounded-xl bg-cupra-card hover:border-cupra-copper border border-cupra-border text-xs text-gray-300" title="Edit Interval / Set Baseline">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button onclick="askAiHowToDo('${t.name.replace(/'/g, "\\'")}')" class="px-3 py-2 rounded-xl bg-cupra-card hover:border-cupra-copper border border-cupra-border text-xs text-cupra-copperLight font-semibold">
+                                        <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>How-To
+                                    </button>
+                                    <button onclick="openLogModal('${t.id}','done')" class="px-4 py-2 rounded-xl copper-grad text-slate-950 text-xs font-bold shadow">
+                                        <i class="fa-solid fa-check mr-1"></i>Mark Done
+                                    </button>
+                                    <button onclick="deleteTask('${t.id}')" class="p-2 rounded-xl bg-cupra-card hover:bg-red-500/20 text-gray-400 hover:text-red-300 border border-cupra-border text-xs" title="Delete Interval">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
                                 </div>
                             </div>
-                            ${t.spec ? `<div class="text-xs font-mono text-gray-300 bg-cupra-card p-2.5 rounded-xl border border-cupra-border">${t.spec}</div>` : ""}
-                            <div class="text-xs font-mono ${ev.remKm < 0 ? 'text-red-300' : 'text-gray-300'}">
-                                <div>Distance: ${ev.remKm >= 0 ? ev.remKm.toLocaleString() + ' km remaining' : 'Overdue by ' + Math.abs(ev.remKm).toLocaleString() + ' km'} (Due @ ${ev.dueKm.toLocaleString()} km)</div>
-                                <div>Date: Due ${ev.dueDate} (${ev.remDays >= 0 ? 'in ' + ev.remDays + ' days' : Math.abs(ev.remDays) + ' days ago'})</div>
-                                <div class="text-gray-400 mt-1">Last done: ${t.lastKm ? Number(t.lastKm).toLocaleString() + ' km on ' + (t.lastDate || '—') : 'Not logged yet'}</div>
-                            </div>
                         </div>
-                        <div class="flex items-center justify-between pt-2.5 border-t border-cupra-border gap-2">
-                            <button onclick="askAiHowToDo('${t.name.replace(/'/g, "\\'")}')" class="px-2.5 py-1.5 rounded-lg bg-cupra-card border border-cupra-border text-xs text-cupra-copperLight"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>Ask AI How-To</button>
-                            <button onclick="openLogModal('${t.id}','done')" class="px-3.5 py-1.5 rounded-lg copper-grad text-white text-xs font-semibold"><i class="fa-solid fa-check mr-1"></i>Mark Done</button>
-                        </div>
+                        ${oilInlineControls}
                     </div>`;
                 }).join("");
             }
 
             renderGuides(car);
             renderHistory(car);
-            const hasKey = !!(localStorage.getItem(API_KEY_STORAGE) || "").trim();
+            const hasKey = !!getStoredApiKey();
             const kb = document.getElementById("aiKeyBadge");
             kb.textContent = hasKey ? "Gemini API Key Active" : "Click to Set Gemini API Key";
             kb.className = hasKey ? "cursor-pointer text-xs font-mono px-2.5 py-1 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/35" : "cursor-pointer text-xs font-mono px-2.5 py-1 rounded bg-amber-500/15 text-amber-300 border border-amber-500/35";
         }
 
-        // IN-PROFILE OIL SERVICE REGIME HANDLERS (#5)
         function syncCarOilTask(car, km, months) {
             if (!car.tasks) car.tasks = [];
-            const oilTask = car.tasks.find(t => t.name.toLowerCase().includes("oil"));
+            const oilTask = car.tasks.find(t => t.isOilService || t.name.toLowerCase().includes("oil"));
+            const modeLabel = car.oilRegimeMode === "fixed"
+                ? `Fixed Interval (${km.toLocaleString()} km / ${months} mos)`
+                : car.oilRegimeMode === "custom"
+                    ? `Custom Regime (${km.toLocaleString()} km / ${months} mos)`
+                    : `Factory Spec (${km.toLocaleString()} km / ${months} mos)`;
             if (oilTask) {
+                oilTask.isOilService = true;
                 oilTask.km = km;
                 oilTask.months = months;
+                oilTask.spec = modeLabel;
             } else {
                 car.tasks.unshift({
                     id: "t_oil_" + Date.now(),
-                    name: "Engine Oil & Filter",
+                    name: "Engine Oil & Oil Filter",
+                    isOilService: true,
                     km: km,
                     months: months,
                     lastKm: 0,
                     lastDate: car.createdAt || new Date().toISOString().split("T")[0],
-                    spec: car.oilRegimeMode === "custom" ? `Custom Regime (${km.toLocaleString()} km / ${months} mos)` : `Factory Spec (${km.toLocaleString()} km / ${months} mos)`
+                    spec: modeLabel
                 });
             }
         }
@@ -1067,15 +1317,20 @@
             const car = getCar();
             if (!car) return;
             car.oilRegimeMode = mode;
-            const def = getFactoryOilDefault(car);
-            if (mode === "factory") {
-                syncCarOilTask(car, def.km, def.months);
+            if (mode === "factory_longlife" || mode === "factory") {
+                car.oilRegimeMode = "factory_longlife";
+                syncCarOilTask(car, 30000, 24);
                 saveState();
                 renderAll();
-                toast(`Oil regime set to Factory Spec (${def.km.toLocaleString()} km / ${def.months} mos)`);
+                toast("Oil regime set to Factory Spec (30,000 km / 24 mos)");
+            } else if (mode === "fixed") {
+                syncCarOilTask(car, 15000, 12);
+                saveState();
+                renderAll();
+                toast("Oil regime set to Fixed Interval (15,000 km / 12 mos)");
             } else {
-                if (!car.oilCustomKm) car.oilCustomKm = def.km;
-                if (!car.oilCustomMonths) car.oilCustomMonths = def.months;
+                if (!car.oilCustomKm) car.oilCustomKm = 15000;
+                if (!car.oilCustomMonths) car.oilCustomMonths = 12;
                 renderAll();
             }
         }
@@ -1083,8 +1338,8 @@
         function applyCustomOilRegime() {
             const car = getCar();
             if (!car) return;
-            const km = parseInt(document.getElementById("oilCustomKm").value, 10) || 15000;
-            const mos = parseInt(document.getElementById("oilCustomMonths").value, 10) || 12;
+            const km = parseInt(document.getElementById("oilCustomKm")?.value, 10) || 15000;
+            const mos = parseInt(document.getElementById("oilCustomMonths")?.value, 10) || 12;
             car.oilRegimeMode = "custom";
             car.oilCustomKm = km;
             car.oilCustomMonths = mos;
@@ -1094,10 +1349,22 @@
             toast(`Custom oil regime applied: ${km.toLocaleString()} km / ${mos} mos`);
         }
 
+        function setGearboxInterval(taskId, km, months) {
+            const car = getCar();
+            if (!car) return;
+            const t = (car.tasks || []).find(x => x.id === taskId);
+            if (!t) return;
+            t.km = km;
+            t.months = months;
+            saveState();
+            renderAll();
+            toast(`Gearbox interval set to ${km.toLocaleString()} km / ${months} mos`);
+        }
+
         function renderGuides(car = getCar()) {
             if (!car) return;
             const q = (document.getElementById("guideSearch")?.value || "").toLowerCase();
-            const filtered = (car.guides || []).filter(g => !q || `${g.title} ${g.torque} ${(g.steps || []).join(" ")}`.toLowerCase().includes(q));
+            const filtered = (car.guides || []).filter(g => !q || `${g.title} ${g.category || ""} ${g.torque} ${(g.steps || []).join(" ")}`.toLowerCase().includes(q));
             if (filtered.length === 0) {
                 document.getElementById("guidesList").innerHTML = `
                 <div class="bg-cupra-surface border border-cupra-border rounded-2xl p-8 text-center space-y-2">
@@ -1108,11 +1375,19 @@
             }
             document.getElementById("guidesList").innerHTML = filtered.map(g => `
                 <div class="bg-cupra-surface border border-cupra-border rounded-2xl p-4 space-y-3">
-                    <div class="flex items-center justify-between border-b border-cupra-border pb-2">
-                        <h4 class="font-display font-bold text-base text-white">${g.title}</h4>
+                    <div class="flex flex-wrap items-center justify-between border-b border-cupra-border pb-2 gap-2">
+                        <div class="flex items-center gap-2">
+                            ${g.category ? `<span class="text-[10px] font-display uppercase tracking-wider px-2 py-0.5 rounded bg-cupra-card border border-cupra-border text-cupra-copperLight font-bold">${g.category}</span>` : ""}
+                            <h4 class="font-display font-bold text-base text-white">${g.title}</h4>
+                        </div>
                         <div class="flex items-center gap-2">
                             <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300">OFFLINE SAVED</span>
-                            <button onclick="deleteGuide('${g.id}')" class="text-gray-500 hover:text-red-400 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+                            <button onclick="openGuideModal('${g.id}')" class="px-2.5 py-1 rounded-lg bg-cupra-card hover:border-cupra-copper border border-cupra-border text-gray-200 text-xs flex items-center gap-1" title="Edit Guide">
+                                <i class="fa-solid fa-pen-to-square text-cupra-copperLight"></i><span>Edit</span>
+                            </button>
+                            <button onclick="deleteGuide('${g.id}')" class="px-2 py-1 rounded-lg bg-cupra-card hover:bg-red-500/20 border border-cupra-border text-gray-400 hover:text-red-300 text-xs" title="Delete Guide">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
                         </div>
                     </div>
                     ${g.torque ? `<div class="text-xs font-mono text-cupra-copperLight bg-cupra-card p-2.5 rounded-xl border border-cupra-border">${g.torque}</div>` : ""}
@@ -1129,18 +1404,25 @@
         function renderHistory(car = getCar()) {
             if (!car) return;
             const h = car.history || [];
-            document.getElementById("historyList").innerHTML = h.length ? h.map(x => `
+            document.getElementById("historyList").innerHTML = h.length ? h.map(x => {
+                const hasCost = x.partCost !== undefined && x.partCost !== null && String(x.partCost).trim() !== "";
+                return `
                 <div class="bg-cupra-card border border-cupra-border rounded-xl p-3 flex items-center justify-between gap-2 text-xs">
-                    <div>
-                        <span class="font-mono text-emerald-300 font-bold">${x.date}</span> • <span class="font-mono text-cupra-copperLight font-bold">${Number(x.km).toLocaleString()} km</span>
-                        <div class="font-bold text-white mt-0.5">${x.title}</div>
-                        <div class="text-gray-400">${x.notes || ""}</div>
+                    <div class="space-y-0.5">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="font-mono text-emerald-300 font-bold">${x.date}</span>
+                            <span>•</span>
+                            <span class="font-mono text-cupra-copperLight font-bold">${Number(x.km).toLocaleString()} km</span>
+                            ${hasCost ? `<span>•</span><span class="font-mono px-2 py-0.5 rounded bg-cupra-bg border border-cupra-border text-gray-200">Part cost: €${Number(x.partCost).toFixed(2)}</span>` : ""}
+                        </div>
+                        <div class="font-bold text-white">${x.title}</div>
+                        ${x.notes ? `<div class="text-gray-400">${x.notes}</div>` : ""}
                     </div>
-                    <button onclick="deleteHistoryEntry('${x.id}')" class="text-gray-500 hover:text-red-400 px-2"><i class="fa-solid fa-trash-can"></i></button>
-                </div>`).join("") : `<div class="text-xs text-gray-400 py-4 text-center">No completed services logged for this vehicle yet.</div>`;
+                    <button onclick="deleteHistoryEntry('${x.id}')" class="text-gray-500 hover:text-red-400 px-2" title="Delete Entry"><i class="fa-solid fa-trash-can"></i></button>
+                </div>`;
+            }).join("") : `<div class="text-xs text-gray-400 py-4 text-center">No completed services logged for this vehicle yet.</div>`;
         }
 
-        // POPULATE ADD VEHICLE DROPDOWNS (100% EMPTY BY DEFAULT)
         function initEmptyVehicleForm() {
             const mSel = document.getElementById("selMake");
             mSel.innerHTML = `<option value="">-- Select Make --</option>` + Object.keys(CATALOG).map(m => `<option value="${m}">${m}</option>`).join("") + `<option value="__custom__">Custom / Type Manually...</option>`;
@@ -1282,7 +1564,6 @@
             });
         }
 
-        // SAVES ONLY THE CAR PROFILE (NO PRE-BAKED MAINTENANCE INSTRUCTIONS)
         function saveVehicleForm(e) {
             e.preventDefault();
             const id = document.getElementById("editVehId").value;
@@ -1302,29 +1583,29 @@
                 const c = state.cars.find(x => x.id === id);
                 if (c) Object.assign(c, { name, make, model, year, engine, gearboxType, gearboxDef, gearbox, odometer, nickname, vin, imageUrl: tempPhoto });
             } else {
-                const defOil = getFactoryOilDefault({ engine });
+                const createdAt = new Date().toISOString().split("T")[0];
                 const newCar = {
                     id: "car_" + Date.now(),
                     name, make, model, year, engine, gearboxType, gearboxDef, gearbox, odometer, nickname, vin,
-                    oilRegimeMode: "factory",
-                    oilCustomKm: defOil.km,
-                    oilCustomMonths: defOil.months,
-                    createdAt: new Date().toISOString().split("T")[0],
+                    oilRegimeMode: "factory_longlife",
+                    oilCustomKm: 30000,
+                    oilCustomMonths: 24,
+                    createdAt,
                     imageUrl: tempPhoto,
                     tasks: [],
                     guides: [],
                     history: []
                 };
+                newCar.tasks = createDefaultIntervalsForCar(newCar);
                 state.cars.push(newCar);
                 state.activeId = newCar.id;
             }
             closeModal("vehicleModal");
             saveState();
             renderAll();
-            toast(id ? "Vehicle updated!" : "Vehicle added to garage!");
+            toast(id ? "Vehicle updated!" : "Vehicle added with 9 standard maintenance intervals!");
         }
 
-        // REMOVE CAR FROM GARAGE
         function confirmRemoveVehicle(id, ev) {
             if (ev) ev.stopPropagation();
             const c = state.cars.find(x => x.id === id);
@@ -1345,22 +1626,13 @@
             toast("Vehicle removed from garage");
         }
 
-        // OPTIONAL 1-CLICK STANDARD INTERVAL TEMPLATE
-        function loadStandardTemplate() {
+        function loadStandardTemplate(reset = false) {
             const c = getCar();
             if (!c) return;
-            const defOil = getFactoryOilDefault(c);
-            const oilKm = c.oilRegimeMode === "custom" ? (Number(c.oilCustomKm) || defOil.km) : defOil.km;
-            const oilMos = c.oilRegimeMode === "custom" ? (Number(c.oilCustomMonths) || defOil.months) : defOil.months;
-            const d = c.createdAt || new Date().toISOString().split("T")[0];
-            c.tasks.push(
-                { id: "t_oil_" + Date.now(), name: "Engine Oil & Filter", km: oilKm, months: oilMos, lastKm: 0, lastDate: d, spec: "" },
-                { id: "t_cab_" + Date.now(), name: "Cabin Dust & Pollen Filter", km: 30000, months: 24, lastKm: 0, lastDate: d, spec: "" },
-                { id: "t_air_" + Date.now(), name: "Engine Air Filter", km: 60000, months: 48, lastKm: 0, lastDate: d, spec: "" },
-                { id: "t_brk_" + Date.now(), name: "Brake Fluid Flush", km: 60000, months: 24, lastKm: 0, lastDate: d, spec: "" },
-                { id: "t_gbx_" + Date.now(), name: "Transmission / Gearbox Service", km: 60000, months: 48, lastKm: 0, lastDate: d, spec: "" }
-            );
-            saveState(); renderAll(); toast("Standard intervals loaded");
+            c.tasks = createDefaultIntervalsForCar(c);
+            saveState();
+            renderAll();
+            toast(reset ? "Standard 9 intervals reset for this vehicle" : "Standard 9 intervals loaded");
         }
 
         function deleteTask(tId) {
@@ -1399,16 +1671,16 @@
         function showGarageLanding() { state.view = "garage"; renderAll(); }
         function openCarWorkspace(id) { state.activeId = id; state.view = "workspace"; saveState(); renderAll(); }
         function openWorkspace(tab) {
+            if (!state.activeId && state.cars.length > 0) {
+                state.activeId = state.cars[0].id;
+            }
             if (!getCar()) return toast("Add or select a vehicle first");
-            state.view = "workspace"; switchWsTab(tab); renderAll();
+            state.view = "workspace";
+            switchWsTab(tab);
         }
         function switchWsTab(tab) {
             state.wsTab = tab;
-            ["schedule", "guides", "logbook", "ai"].forEach(t => {
-                document.getElementById("wsTab-" + t).classList.toggle("hidden", t !== tab);
-                const b = document.getElementById("tabBtn-" + t);
-                if (b) b.className = t === tab ? "ws-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold copper-grad text-white" : "ws-tab-btn px-3.5 py-2 rounded-lg text-xs font-semibold text-gray-300 hover:bg-cupra-card";
-            });
+            renderAll();
         }
 
         function setFilter(f) { state.filter = f; renderWorkspace(getCar()); }
@@ -1425,15 +1697,19 @@
             });
         }
 
+        // LOG COMPLETED SERVICE MODAL: Part cost (€) + 100% Empty Notes by Default
         function openLogModal(taskId, mode) {
             const c = getCar(); if (!c) return;
             const t = (c.tasks || []).find(x => x.id === taskId);
             document.getElementById("logTaskId").value = taskId;
             document.getElementById("logCustomNameBox").classList.toggle("hidden", !!t);
+            document.getElementById("logCustomName").value = "";
             document.getElementById("logModalHeader").textContent = t ? `Mark Done: ${t.name}` : "Add Service Log Entry";
             document.getElementById("logDate").value = new Date().toISOString().split("T")[0];
             document.getElementById("logKm").value = c.odometer;
-            document.getElementById("logNotes").value = t ? (t.spec || "") : "";
+            document.getElementById("logPartCost").value = "";
+            // Notes strictly empty by default
+            document.getElementById("logNotesInput").value = "";
             document.getElementById("logModal").classList.remove("hidden");
         }
 
@@ -1443,96 +1719,227 @@
             const tId = document.getElementById("logTaskId").value;
             const date = document.getElementById("logDate").value;
             const km = parseInt(document.getElementById("logKm").value, 10) || c.odometer;
-            const notes = document.getElementById("logNotes").value;
-            let title = document.getElementById("logCustomName").value || "Service Entry";
+            const partCostRaw = document.getElementById("logPartCost").value.trim();
+            const partCost = partCostRaw !== "" ? parseFloat(partCostRaw) : "";
+            const notes = document.getElementById("logNotesInput").value.trim();
+            let title = document.getElementById("logCustomName").value.trim() || "Service Entry";
             if (tId) {
                 const t = (c.tasks || []).find(x => x.id === tId);
                 if (t) { title = t.name; t.lastDate = date; t.lastKm = km; }
             }
             if (km > c.odometer) c.odometer = km;
-            c.history.unshift({ id: "h_" + Date.now(), date, km, title, notes });
+            c.history.unshift({ id: "h_" + Date.now(), date, km, title, partCost, notes });
             closeModal("logModal"); saveState(); renderAll(); toast("Service logged!");
         }
 
-        function openTaskModal() {
-            ["newTaskName", "newTaskKm", "newTaskMonths", "newTaskLastKm", "newTaskLastDate", "newTaskSpec"].forEach(id => document.getElementById(id).value = "");
+        function openTaskModal(editTaskId = "") {
+            const c = getCar();
+            document.getElementById("editTaskId").value = editTaskId;
+            if (editTaskId && c) {
+                const t = (c.tasks || []).find(x => x.id === editTaskId);
+                if (t) {
+                    document.getElementById("taskModalHeader").textContent = "Edit Interval / Set Baseline";
+                    document.getElementById("newTaskName").value = t.name || "";
+                    document.getElementById("newTaskKm").value = t.km || 15000;
+                    document.getElementById("newTaskMonths").value = t.months || 12;
+                    document.getElementById("newTaskLastKm").value = t.lastKm || 0;
+                    document.getElementById("newTaskLastDate").value = t.lastDate || "";
+                    document.getElementById("newTaskSpec").value = t.spec || "";
+                }
+            } else {
+                document.getElementById("taskModalHeader").textContent = "Add Maintenance Interval";
+                ["newTaskName", "newTaskKm", "newTaskMonths", "newTaskLastKm", "newTaskLastDate", "newTaskSpec"].forEach(id => document.getElementById(id).value = "");
+            }
             document.getElementById("taskModal").classList.remove("hidden");
         }
+
         function submitTaskForm(e) {
             e.preventDefault();
             const c = getCar(); if (!c) return;
-            c.tasks.push({
-                id: "tc_" + Date.now(),
+            const editId = document.getElementById("editTaskId").value;
+            const payload = {
                 name: document.getElementById("newTaskName").value.trim(),
                 km: parseInt(document.getElementById("newTaskKm").value, 10) || 15000,
                 months: parseInt(document.getElementById("newTaskMonths").value, 10) || 12,
                 lastKm: parseInt(document.getElementById("newTaskLastKm").value, 10) || 0,
                 lastDate: document.getElementById("newTaskLastDate").value || c.createdAt || new Date().toISOString().split("T")[0],
                 spec: document.getElementById("newTaskSpec").value.trim()
-            });
-            closeModal("taskModal"); saveState(); renderAll(); toast("Interval added!");
+            };
+            if (editId) {
+                const existing = (c.tasks || []).find(x => x.id === editId);
+                if (existing) Object.assign(existing, payload);
+            } else {
+                c.tasks.push(Object.assign({ id: "tc_" + Date.now() }, payload));
+            }
+            closeModal("taskModal"); saveState(); renderAll(); toast(editId ? "Interval updated!" : "Interval added!");
         }
 
-        function openGuideModal() { document.getElementById("guideModal").classList.remove("hidden"); }
+        function openGuideModal(editId = "") {
+            const c = getCar();
+            document.getElementById("editGuideId").value = editId;
+            if (editId && c) {
+                const g = (c.guides || []).find(x => x.id === editId);
+                if (g) {
+                    document.getElementById("guideModalHeader").textContent = "Edit Offline Workshop Guide";
+                    document.getElementById("guideSubmitBtn").textContent = "Update Guide";
+                    document.getElementById("gTitle").value = g.title || "";
+                    document.getElementById("gCategory").value = g.category || "";
+                    document.getElementById("gTorque").value = g.torque || "";
+                    document.getElementById("gSteps").value = (g.steps || []).join("\n");
+                }
+            } else {
+                document.getElementById("guideModalHeader").textContent = "Save Offline Workshop Guide";
+                document.getElementById("guideSubmitBtn").textContent = "Save Guide";
+                document.getElementById("gTitle").value = "";
+                document.getElementById("gCategory").value = "";
+                document.getElementById("gTorque").value = "";
+                document.getElementById("gSteps").value = "";
+            }
+            document.getElementById("guideModal").classList.remove("hidden");
+        }
+
         function submitGuideForm(e) {
             e.preventDefault();
             const c = getCar(); if (!c) return;
-            c.guides.unshift({
-                id: "gc_" + Date.now(),
-                title: document.getElementById("gTitle").value.trim(),
-                torque: document.getElementById("gTorque").value.trim(),
-                steps: document.getElementById("gSteps").value.split("\n").map(s => s.trim()).filter(Boolean)
-            });
-            closeModal("guideModal"); saveState(); renderAll(); toast("Offline guide saved!");
+            const editId = document.getElementById("editGuideId").value;
+            const title = document.getElementById("gTitle").value.trim();
+            const category = document.getElementById("gCategory").value.trim();
+            const torque = document.getElementById("gTorque").value.trim();
+            const steps = document.getElementById("gSteps").value.split("\n").map(s => s.trim()).filter(Boolean);
+
+            if (editId) {
+                const existing = (c.guides || []).find(x => x.id === editId);
+                if (existing) Object.assign(existing, { title, category, torque, steps });
+            } else {
+                c.guides.unshift({ id: "gc_" + Date.now(), title, category, torque, steps });
+            }
+            closeModal("guideModal"); saveState(); renderAll(); toast(editId ? "Guide updated!" : "Offline guide saved!");
         }
 
         function setAiPrompt(txt) { document.getElementById("aiInput").value = txt; }
+
+        async function callGeminiWithFallback(key, promptText, sysInstruction) {
+            const modelsToTry = ["gemini-2.5-flash", "gemini-3-flash-preview", "gemini-2.0-flash"];
+            let lastErr = "";
+            for (const m of modelsToTry) {
+                try {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(key)}`;
+                    const res = await fetch(url, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "x-goog-api-key": key
+                        },
+                        body: JSON.stringify({
+                            contents: [{ role: "user", parts: [{ text: promptText }] }],
+                            tools: [{ google_search: {} }],
+                            systemInstruction: sysInstruction ? { parts: [{ text: sysInstruction }] } : undefined
+                        })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data?.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        return { ok: true, text: data.candidates[0].content.parts[0].text, model: m };
+                    }
+                    lastErr = data?.error?.message || `HTTP ${res.status}`;
+                } catch (e) {
+                    lastErr = e.message || "Network error";
+                }
+            }
+            return { ok: false, error: lastErr };
+        }
+
         async function runGeminiQuery() {
             const c = getCar(); if (!c) return;
             const q = document.getElementById("aiInput").value.trim();
             if (!q) return toast("Enter a question first");
-            const key = (localStorage.getItem(API_KEY_STORAGE) || "").trim();
+            const key = getStoredApiKey();
             const box = document.getElementById("aiResultBox");
             box.classList.remove("hidden");
             if (!key) {
-                box.textContent = "Please paste your Gemini API Key in Settings (top-right) so live AI queries can run.";
+                box.textContent = "No Gemini API Key saved yet. Open Settings (top-right) to paste a key if you want live AI answers. (Offline tracking and guides work without any key!)";
                 return;
             }
             const mode = document.getElementById("aiModeSelect").value;
             document.getElementById("aiRunText").textContent = "Researching...";
             box.textContent = `Running ${mode.toUpperCase()} for ${c.name} (${c.engine}, ${formatGearboxDisplay(c)})...`;
 
-            try {
-                const sys = `You are a Master European Automotive Technician. Active vehicle profile: ${c.name}, Engine: ${c.engine}, Transmission: ${formatGearboxDisplay(c)}, Odometer: ${c.odometer} km. Provide accurate factory tightening torques (Nm), OEM fluid norms/capacities (L), and clear numbered steps.`;
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${encodeURIComponent(key)}`, {
-                    method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: `[MODE: ${mode.toUpperCase()}]\n${q}` }] }], tools: [{ google_search: {} }], systemInstruction: { parts: [{ text: sys }] } })
-                });
-                const data = await res.json();
-                const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Could not retrieve response. Verify your API key.";
-                lastAiText = txt;
-                box.textContent = txt;
+            const sys = `You are a Master European Automotive Technician. Active vehicle profile: ${c.name}, Engine: ${c.engine}, Transmission: ${formatGearboxDisplay(c)}, Odometer: ${c.odometer} km. Provide accurate factory tightening torques (Nm), OEM fluid norms/capacities (L), and clear numbered steps.`;
+            const result = await callGeminiWithFallback(key, `[MODE: ${mode.toUpperCase()}]\n${q}`, sys);
+            if (result.ok) {
+                lastAiText = result.text;
+                box.textContent = result.text;
                 document.getElementById("saveAiGuideBtn").classList.remove("hidden");
-            } catch (err) {
-                box.textContent = "Offline or connection error. Check your internet connection or view saved Offline Guides.";
+            } else {
+                box.textContent = `Gemini API Error: ${result.error}\n\nNote on API Keys: If your key starts with "AQ.", Google Cloud created an OAuth/Vertex token instead of a browser Gemini API key. To get a standard "AIzaSy..." Gemini key: open https://aistudio.google.com/app/apikey -> click "Create API key" -> select "Create API key in new project" -> copy the key starting with "AIzaSy...".`;
             }
             document.getElementById("aiRunText").textContent = "Ask Gemini Mechanic";
         }
 
         function saveLastAiToGuides() {
             if (!lastAiText) return;
+            openGuideModal("");
             document.getElementById("gTitle").value = (document.getElementById("aiInput").value || "Workshop Guide").slice(0, 65);
+            document.getElementById("gCategory").value = "AI Workshop Procedure";
             document.getElementById("gTorque").value = "Generated via Gemini AI Mechanic";
             document.getElementById("gSteps").value = lastAiText;
-            openGuideModal();
         }
 
         function openSettingsModal() {
-            document.getElementById("apiKeyInput").value = localStorage.getItem(API_KEY_STORAGE) || "";
+            document.getElementById("apiKeyInput").value = getStoredApiKey();
+            document.getElementById("syncRoomInput").value = localStorage.getItem(SYNC_ROOM_KEY) || "klemen_digital_garage_v3";
+            document.getElementById("apiKeyTestStatus")?.classList.add("hidden");
             document.getElementById("settingsModal").classList.remove("hidden");
         }
         function openInstallModal() { document.getElementById("installModal").classList.remove("hidden"); }
-        function saveApiKey() { localStorage.setItem(API_KEY_STORAGE, document.getElementById("apiKeyInput").value.trim()); renderAll(); toast("Gemini API Key saved!"); }
+
+        function saveSyncRoom() {
+            const room = (document.getElementById("syncRoomInput")?.value || "klemen_digital_garage_v3").trim();
+            localStorage.setItem(SYNC_ROOM_KEY, room);
+            toast("Sync room updated");
+        }
+
+        function saveApiKey() {
+            const k = document.getElementById("apiKeyInput").value.trim();
+            localStorage.setItem(API_KEY_STORAGE, k);
+            localStorage.setItem(LEGACY_API_KEY_STORAGE, k);
+            renderAll();
+            toast(k ? "Gemini API Key saved locally!" : "Gemini API Key cleared");
+        }
+
+        async function testGeminiApiKey() {
+            const k = document.getElementById("apiKeyInput").value.trim();
+            const st = document.getElementById("apiKeyTestStatus");
+            st.classList.remove("hidden");
+            if (!k) {
+                st.className = "text-[11px] font-mono p-2.5 rounded-lg bg-amber-500/15 text-amber-300 border border-amber-500/35";
+                st.textContent = "Please paste a key into the box first.";
+                return;
+            }
+            localStorage.setItem(API_KEY_STORAGE, k);
+            localStorage.setItem(LEGACY_API_KEY_STORAGE, k);
+            st.className = "text-[11px] font-mono p-2.5 rounded-lg bg-cupra-bg text-gray-300 border border-cupra-border";
+            st.textContent = "Testing key against Google Gemini API...";
+            const res = await callGeminiWithFallback(k, "Reply with the single word: CONNECTED", "");
+            if (res.ok) {
+                st.className = "text-[11px] font-mono p-2.5 rounded-lg bg-emerald-500/15 text-emerald-300 border border-emerald-500/35";
+                st.textContent = `✓ Success! Key is valid and connected (${res.model}).`;
+                renderAll();
+            } else {
+                st.className = "text-[11px] font-mono p-2.5 rounded-lg bg-red-500/15 text-red-300 border border-red-500/35";
+                st.textContent = `✗ Google rejected this key (${res.error}). Tip: Open aistudio.google.com/app/apikey, click "Create API key in new project", and copy the key starting with "AIzaSy...".`;
+            }
+        }
+
+        function downloadIndexHtmlFile() {
+            const fullHtml = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+            const blob = new Blob([fullHtml], { type: "text/html;charset=utf-8" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "index.html";
+            a.click();
+            toast("Downloaded index.html!");
+        }
+
         function closeModal(id) { document.getElementById(id).classList.add("hidden"); }
         function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.classList.remove("hidden"); clearTimeout(window._tt); window._tt = setTimeout(() => t.classList.add("hidden"), 3200); }
 
@@ -1546,14 +1953,19 @@
             try {
                 if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CFG);
                 db = firebase.firestore();
-                const room = document.getElementById("syncRoomInput")?.value || "klemen_digital_garage_v3";
+                const room = localStorage.getItem(SYNC_ROOM_KEY) || document.getElementById("syncRoomInput")?.value || "klemen_digital_garage_v3";
                 db.collection("garages").doc(room).onSnapshot(doc => {
                     if (!doc.exists) return;
                     const d = doc.data();
                     if (d?.payload) {
-                        const p = JSON.parse(d.payload);
-                        if (p.updated > (state.updated || 0)) {
-                            state = Object.assign(state, p);
+                        const cloudParsed = migrateAndNormalizeGarageState(JSON.parse(d.payload));
+                        // Auto-restore if local garage is empty or if cloud state is newer
+                        const localIsEmpty = !Array.isArray(state.cars) || state.cars.length === 0;
+                        const cloudHasCars = Array.isArray(cloudParsed.cars) && cloudParsed.cars.length > 0;
+                        if ((localIsEmpty && cloudHasCars) || (cloudParsed.updated > (state.updated || 0))) {
+                            const currentView = state.view;
+                            state = cloudParsed;
+                            if (currentView === "workspace" && getCar()) state.view = "workspace";
                             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                             renderAll();
                         }
@@ -1564,14 +1976,32 @@
 
         async function pushCloud(manual = false) {
             if (!db || !navigator.onLine) return;
-            const room = document.getElementById("syncRoomInput")?.value || "klemen_digital_garage_v3";
+            const room = (document.getElementById("syncRoomInput")?.value || localStorage.getItem(SYNC_ROOM_KEY) || "klemen_digital_garage_v3").trim();
+            localStorage.setItem(SYNC_ROOM_KEY, room);
             try {
                 await db.collection("garages").doc(room).set({ updatedAt: Date.now(), payload: JSON.stringify(state) });
                 if (manual) toast("Synced with Firebase Cloud!");
             } catch (e) {}
         }
 
-        // TWO-STEP WARNING & CONFIRMATION FOR WIPE ALL GARAGE DATA (#3)
+        async function pullFromCloud(manual = false) {
+            if (!db || !navigator.onLine) return toast("Offline — connect to internet to restore from cloud");
+            const room = (document.getElementById("syncRoomInput")?.value || localStorage.getItem(SYNC_ROOM_KEY) || "klemen_digital_garage_v3").trim();
+            try {
+                const doc = await db.collection("garages").doc(room).get();
+                if (!doc.exists || !doc.data()?.payload) {
+                    if (manual) toast("No cloud backup found for room: " + room);
+                    return;
+                }
+                state = migrateAndNormalizeGarageState(JSON.parse(doc.data().payload));
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                renderAll();
+                if (manual) toast("Restored garage from Firebase Cloud!");
+            } catch (e) {
+                if (manual) toast("Cloud restore error");
+            }
+        }
+
         function openWipeConfirmModal() {
             const inp = document.getElementById("wipeConfirmInput");
             const btn = document.getElementById("wipeConfirmBtn");
@@ -1589,7 +2019,6 @@
         function executeWipeAllData() {
             const val = (document.getElementById("wipeConfirmInput")?.value || "").trim().toUpperCase();
             if (val !== "DELETE") return;
-            localStorage.removeItem("digital_garage_manager_v1");
             localStorage.removeItem(STORAGE_KEY);
             state = { view: "garage", activeId: null, wsTab: "schedule", filter: "all", checked: {}, updated: Date.now(), cars: [] };
             saveState(true);
@@ -1600,23 +2029,36 @@
         }
 
         function exportJson() {
+            const dateStr = new Date().toISOString().split("T")[0];
             const a = document.createElement("a");
             a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], { type: "application/json" }));
-            a.download = "digital_garage_backup.json"; a.click();
+            a.download = `digital_garage_backup_${dateStr}.json`;
+            a.click();
         }
+
         function importJson(ev) {
             const f = ev.target.files?.[0]; if (!f) return;
             const r = new FileReader();
-            r.onload = e => { try { state = JSON.parse(e.target.result); saveState(); renderAll(); toast("Backup restored!"); } catch (err) {} };
+            r.onload = e => {
+                try {
+                    state = migrateAndNormalizeGarageState(JSON.parse(e.target.result));
+                    saveState(true);
+                    renderAll();
+                    closeModal("settingsModal");
+                    toast("Backup restored!");
+                } catch (err) {
+                    toast("Invalid backup file");
+                }
+            };
             r.readAsText(f);
         }
 
-        // PWA MANIFEST & CACHE-BUSTING SETUP (#1, #2)
         window.addEventListener("beforeinstallprompt", e => {
             e.preventDefault();
             deferredPrompt = e;
             document.getElementById("nativeInstallBanner")?.classList.remove("hidden");
         });
+
         async function triggerNativeInstall() {
             if (!deferredPrompt) return;
             deferredPrompt.prompt();
@@ -1624,26 +2066,16 @@
             deferredPrompt = null;
             closeModal("installModal");
         }
-        async function clearLegacyCaches() {
-            try {
-                localStorage.removeItem("digital_garage_manager_v1");
-                if ("caches" in window) {
-                    const keys = await caches.keys();
-                    for (const k of keys) {
-                        if (k !== CACHE_VERSION) await caches.delete(k);
-                    }
-                }
-            } catch (e) {}
-        }
+
         function injectPwaManifest() {
             const manifest = {
                 name: "Digital Garage Manager",
                 short_name: "Digital Garage",
-                start_url: "./?v=3",
+                start_url: "./",
                 display: "standalone",
                 background_color: "#0f1217",
-                theme_color: "#b87333",
-                icons: [{ src: "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="36" fill="#0f1217"/><circle cx="96" cy="96" r="70" fill="none" stroke="#d48c46" stroke-width="10"/><path d="M50 112 L64 82 L128 82 L142 112 Z" fill="#b87333"/></svg>`), sizes: "192x192", type: "image/svg+xml" }]
+                theme_color: "#c87d55",
+                icons: [{ src: "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="36" fill="#0f1217"/><circle cx="96" cy="96" r="70" fill="none" stroke="#e09f7d" stroke-width="10"/><path d="M50 112 L64 82 L128 82 L142 112 Z" fill="#c87d55"/></svg>`), sizes: "192x192", type: "image/svg+xml" }]
             };
             const link = document.createElement("link");
             link.rel = "manifest";
@@ -1651,12 +2083,15 @@
             document.head.appendChild(link);
         }
 
-        window.onload = async () => {
-            await clearLegacyCaches();
+        window.onload = () => {
+            document.title = "Digital Garage Manager";
             injectPwaManifest();
+            // Load and normalize existing garage data WITHOUT ever wiping it
             try {
-                const s = JSON.parse(localStorage.getItem(STORAGE_KEY));
-                if (s && Array.isArray(s.cars)) state = Object.assign(state, s);
+                const rawLocal = localStorage.getItem(STORAGE_KEY);
+                if (rawLocal) {
+                    state = migrateAndNormalizeGarageState(JSON.parse(rawLocal));
+                }
             } catch (e) {}
             state.view = "garage";
             renderAll();
